@@ -1,3 +1,5 @@
+# Python version 3.12.3
+
 ## 🚀 Installation & Run
 
 1. Create and activate a virtual environment  
@@ -18,4 +20,7 @@ pip install -r requirements.txt
 3. Run the FastAPI server
 ```bash
 uvicorn main:app --reload
+```
+```bash
+python run.py
 ```
