@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from middlewares.exception_handler import ExceptionHandlerMiddleware
-from routes.register_routes import register_routes
+from routes import register_routes
 
-app = FastAPI()
+app = FastAPI(title="Documentor AI APIs")
 
 # Global Exception Handler Middleware
 app.add_middleware(ExceptionHandlerMiddleware)
@@ -18,6 +19,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Register all routes
 register_routes(app)

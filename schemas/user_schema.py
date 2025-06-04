@@ -1,27 +1,27 @@
-from bson import ObjectId
+# schemas/user_schema.py
 from pydantic import BaseModel, Field, EmailStr
-from typing import Optional, Union
+from typing import Optional
+from datetime import datetime
+from defaults.enums import UserRole
 
-class UserSchema(BaseModel):
-    id: Optional[Union[str, ObjectId]] = Field(alias="_id")
-    name: str
-    email: str
-
-    model_config = {
-        "populate_by_name": True,
-        "arbitrary_types_allowed": True,
-        "json_encoders": {ObjectId: str},
-    }
-
-class UserCreate(BaseModel):
+class UserBase(BaseModel):
+    full_name: str = Field(..., min_length=2, max_length=100)
     email: EmailStr
-    password: str
-    name: str
+    role: UserRole = UserRole.END_USER
 
-class UserOut(BaseModel):
-    email: EmailStr
-    name: str
+class UserCreate(UserBase):
+    password: str = Field(..., min_length=8)
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = Field(None, min_length=2, max_length=100)
+    email: Optional[EmailStr] = None
+    role: Optional[UserRole] = None
+
+class UserStatusUpdate(BaseModel):
+    is_active: bool
+
+class UserInDB(UserBase):
+    _id: str
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime

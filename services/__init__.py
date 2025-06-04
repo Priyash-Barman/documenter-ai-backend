@@ -5,6 +5,6 @@ from db.mongo import mongo
 class ServiceContainer:
     def __init__(self):
         self.user_service = UserService(mongo)
-        self.auth_service = AuthService(mongo)
+        # self.auth_service = AuthService(mongo)
 
 services = ServiceContainer()
