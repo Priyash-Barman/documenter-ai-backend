@@ -1,0 +1,40 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ "Edit" if user else "Create" }} User{% endblock %}
+
+{% block content %}
+<h4 class="manage-heading">{{ "Edit" if user else "Create" }} User</h4>
+
+<form method="post" id="userForm">
+    <div class="mb-3">
+        <label>Full Name</label>
+        <input type="text" class="form-control" name="full_name" value="{{ user.full_name if user else '' }}" required>
+    </div>
+    <div class="mb-3">
+        <label>Email</label>
+        <input type="email" class="form-control" name="email" value="{{ user.email if user else '' }}" required>
+    </div>
+    <div class="mb-3">
+        <label>Password</label>
+        <input type="password" class="form-control" name="password" value="{{ user.password if user else '' }}" required>
+    </div>
+    <div class="mb-3">
+        <label>Role</label>
+        <select class="form-control" name="role" required>
+            <option value="end_user" {% if user and user.role == "end_user" %}selected{% endif %}>End User</option>
+            <option value="admin" {% if user and user.role == "admin" %}selected{% endif %}>Admin</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-success">Submit</button>
+    <a href="/admin/users" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('#userForm').on('submit', function () {
+            toastr.success("Submitted!");
+        });
+    });
+</script>
+{% endblock %}

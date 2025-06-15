@@ -1,0 +1,53 @@
+{% extends "admin/layout.html" %}
+{% block title %}History Details{% endblock %}
+
+{% block content %}
+<h4 class="manage-heading">HISTORY DETAILS</h4>
+
+<div class="card">
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <h5>Request Information</h5>
+                <p><strong>ID:</strong> {{ history.id }}</p>
+                <p><strong>Request From:</strong> {{ history.req_from|title }}</p>
+                <p><strong>User ID:</strong> {{ history.user_id or '-' }}</p>
+                <p><strong>App ID:</strong> {{ history.app_id or '-' }}</p>
+                <p><strong>Timestamp:</strong> {{ history.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            </div>
+            <div class="col-md-6">
+                <h5>Request Content</h5>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <pre>{{ history.req_text }}</pre>
+                    </div>
+                </div>
+                {% if history.req_file_url %}
+                <p class="mt-2">
+                    <strong>File:</strong> <a href="{{ history.req_file_url }}" target="_blank">View File</a>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h5>Response Content</h5>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <pre>{{ history.res_text }}</pre>
+                    </div>
+                </div>
+                {% if history.res_file_url %}
+                <p class="mt-2">
+                    <strong>File:</strong> <a href="{{ history.res_file_url }}" target="_blank">View File</a>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<a href="/admin/histories" class="btn btn-secondary mt-3">Back to List</a>
+
+{% endblock %}

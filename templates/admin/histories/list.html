@@ -1,0 +1,67 @@
+{% extends "admin/layout.html" %}
+{% block title %}Histories List{% endblock %}
+
+{% block content %}
+<h4 class="manage-heading">HISTORIES</h4>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col">
+        <select name="req_from" class="form-control">
+            <option value="">All Sources</option>
+            <option value="user" {% if req_from == "user" %}selected{% endif %}>User</option>
+            <option value="app" {% if req_from == "app" %}selected{% endif %}>App</option>
+        </select>
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" name="user_id" value="{{ user_id or '' }}" placeholder="User ID">
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" name="app_id" value="{{ app_id or '' }}" placeholder="App ID">
+    </div>
+    <div class="col">
+        <button class="btn btn-secondary" type="submit">Filter</button>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Request From</th>
+            <th>User ID</th>
+            <th>App ID</th>
+            <th>Request</th>
+            <th>Timestamp</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for history in histories %}
+        <tr>
+            <td>{{ history.req_from|title }}</td>
+            <td>{{ history.user_id or '-' }}</td>
+            <td>{{ history.app_id or '-' }}</td>
+            <td>{{ history.req_text|truncate(50) }}</td>
+            <td>{{ history.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>
+                <a href="/admin/histories/{{ history.id }}" class="btn btn-sm btn-info">Details</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-12">
+        <nav>
+            <ul class="pagination float-end">
+                {% for page_num in range(1, pagination.total_pages + 1) %}
+                <li class="page-item {% if page_num == pagination.current_page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}{% if req_from %}&req_from={{ req_from }}{% endif %}">{{ page_num }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+{% endblock %}

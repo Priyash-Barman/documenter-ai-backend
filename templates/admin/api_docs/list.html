@@ -1,0 +1,81 @@
+{% extends "admin/layout.html" %}
+{% block title %}API Docs List{% endblock %}
+
+{% block content %}
+<h4 class="manage-heading">API DOCS</h4>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col">
+        <input type="text" class="form-control" name="search" value="{{ search or '' }}" placeholder="Search...">
+    </div>
+    <div class="col">
+        <select name="method" class="form-control">
+            <option value="">All Methods</option>
+            <option value="GET" {% if method == "GET" %}selected{% endif %}>GET</option>
+            <option value="POST" {% if method == "POST" %}selected{% endif %}>POST</option>
+            <option value="PUT" {% if method == "PUT" %}selected{% endif %}>PUT</option>
+            <option value="DELETE" {% if method == "DELETE" %}selected{% endif %}>DELETE</option>
+        </select>
+    </div>
+    <div class="col">
+        <select name="is_active" class="form-control">
+            <option value="">All Status</option>
+            <option value="true" {% if is_active %}selected{% endif %}>Active</option>
+            <option value="false" {% if is_active == false %}selected{% endif %}>Inactive</option>
+        </select>
+    </div>
+    <div class="col">
+        <button class="btn btn-secondary" type="submit">Filter</button>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>URL</th>
+            <th>Method</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for doc in api_docs %}
+        <tr>
+            <td>{{ doc.url }}</td>
+            <td><span class="badge bg-primary">{{ doc.method }}</span></td>
+            <td>{{ doc.description }}</td>
+            <td>
+                {% if doc.is_active %}
+                    <span class="badge bg-success">Active</span>
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="/admin/api-docs/{{ doc.id }}/edit" class="btn btn-sm btn-info">Edit</a>
+                <a href="/admin/api-docs/{{ doc.id }}/delete" onclick="return confirm('Are you sure?')" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-3">
+        <a href="/admin/api-docs/create" class="btn btn-primary mb-3">Create API Doc</a>
+    </div>
+    <div class="col-9">
+        <nav>
+            <ul class="pagination float-end">
+                {% for page_num in range(1, pagination.total_pages + 1) %}
+                <li class="page-item {% if page_num == pagination.current_page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}{% if search %}&search={{ search }}{% endif %}">{{ page_num }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+{% endblock %}

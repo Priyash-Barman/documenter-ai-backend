@@ -1,0 +1,70 @@
+{% extends "admin/layout.html" %}
+{% block title %}Transactions List{% endblock %}
+
+{% block content %}
+<h4 class="manage-heading">TRANSACTIONS</h4>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col">
+        <select name="status" class="form-control">
+            <option value="">All Status</option>
+            <option value="pending" {% if status == "pending" %}selected{% endif %}>Pending</option>
+            <option value="completed" {% if status == "completed" %}selected{% endif %}>Completed</option>
+            <option value="failed" {% if status == "failed" %}selected{% endif %}>Failed</option>
+        </select>
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" name="subscription_id" value="{{ subscription_id or '' }}" placeholder="Subscription ID">
+    </div>
+    <div class="col">
+        <button class="btn btn-secondary" type="submit">Filter</button>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Subscription ID</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tx in transactions %}
+        <tr>
+            <td>{{ tx.subscription_id }}</td>
+            <td>{{ tx.amount }} {{ tx.currency }}</td>
+            <td>
+                <span class="badge
+                    {% if tx.status == 'completed' %}bg-success
+                    {% elif tx.status == 'failed' %}bg-danger
+                    {% else %}bg-warning{% endif %}">
+                    {{ tx.status|title }}
+                </span>
+            </td>
+            <td>{{ tx.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>
+                <a href="/admin/transactions/{{ tx.id }}" class="btn btn-sm btn-info">Details</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-12">
+        <nav>
+            <ul class="pagination float-end">
+                {% for page_num in range(1, pagination.total_pages + 1) %}
+                <li class="page-item {% if page_num == pagination.current_page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}{% if status %}&status={{ status }}{% endif %}">{{ page_num }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+{% endblock %}

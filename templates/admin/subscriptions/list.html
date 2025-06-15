@@ -1,0 +1,81 @@
+{% extends "admin/layout.html" %}
+{% block title %}Subscriptions List{% endblock %}
+
+{% block content %}
+<h4 class="manage-heading">SUBSCRIPTIONS</h4>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col">
+        <select name="status" class="form-control">
+            <option value="">All Status</option>
+            <option value="active" {% if status == "active" %}selected{% endif %}>Active</option>
+            <option value="canceled" {% if status == "canceled" %}selected{% endif %}>Canceled</option>
+            <option value="past_due" {% if status == "past_due" %}selected{% endif %}>Past Due</option>
+        </select>
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" name="user_id" value="{{ user_id or '' }}" placeholder="User ID">
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" name="app_id" value="{{ app_id or '' }}" placeholder="App ID">
+    </div>
+    <div class="col">
+        <button class="btn btn-secondary" type="submit">Filter</button>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>App ID</th>
+            <th>Package ID</th>
+            <th>Status</th>
+            <th>Period</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sub in subscriptions %}
+        <tr>
+            <td>{{ sub.user_id }}</td>
+            <td>{{ sub.app_id }}</td>
+            <td>{{ sub.package_id }}</td>
+            <td>
+                <span class="badge
+                    {% if sub.status == 'active' %}bg-success
+                    {% elif sub.status == 'canceled' %}bg-danger
+                    {% else %}bg-warning{% endif %}">
+                    {{ sub.status|title }}
+                </span>
+            </td>
+            <td>
+                {{ sub.start_date.strftime('%Y-%m-%d') }} to
+                {{ sub.end_date.strftime('%Y-%m-%d') }}
+            </td>
+            <td>
+                <a href="/admin/subscriptions/{{ sub.id }}" class="btn btn-sm btn-info">Details</a>
+                {% if sub.status == 'active' %}
+                <a href="/admin/subscriptions/{{ sub.id }}/cancel" class="btn btn-sm btn-danger">Cancel</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-12">
+        <nav>
+            <ul class="pagination float-end">
+                {% for page_num in range(1, pagination.total_pages + 1) %}
+                <li class="page-item {% if page_num == pagination.current_page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}{% if status %}&status={{ status }}{% endif %}">{{ page_num }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+{% endblock %}
