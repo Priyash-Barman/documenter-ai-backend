@@ -1,0 +1,41 @@
+# templates/admin/packages/form.html
+{% extends "admin/layout.html" %}
+{% block title %}{{ "Edit" if package else "Create" }} Package{% endblock %}
+
+{% block content %}
+<h4 class="manage-heading">{{ "Edit" if package else "Create" }} Package</h4>
+
+<form method="post" id="packageForm">
+    <div class="mb-3">
+        <label>Name</label>
+        <input type="text" class="form-control" name="name" value="{{ package.name if package else '' }}" required>
+    </div>
+    <div class="mb-3">
+        <label>Stripe Price ID</label>
+        <input type="text" class="form-control" name="stripe_price_id" value="{{ package.stripe_price_id if package else '' }}" required>
+    </div>
+    <div class="mb-3">
+        <label>Type</label>
+        <select class="form-control" name="type" required>
+            <option value="user" {% if package and package.type == "user" %}selected{% endif %}>User</option>
+            <option value="app" {% if package and package.type == "app" %}selected{% endif %}>App</option>
+        </select>
+    </div>
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" name="is_active" id="is_active" {% if package and package.is_active or not package %}checked{% endif %}>
+        <label class="form-check-label" for="is_active">Active</label>
+    </div>
+    <button type="submit" class="btn btn-success">Submit</button>
+    <a href="/admin/packages" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('#packageForm').on('submit', function () {
+            toastr.success("Submitted!");
+        });
+    });
+</script>
+{% endblock %}

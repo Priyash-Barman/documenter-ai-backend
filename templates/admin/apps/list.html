@@ -1,0 +1,76 @@
+{% extends "admin/layout.html" %}
+{% block title %}App List{% endblock %}
+
+{% block content %}
+<h4 class="manage-heading">APPS</h4>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col">
+        <input type="text" class="form-control" name="search" value="{{ search or '' }}" placeholder="Search...">
+    </div>
+    <div class="col">
+        <select name="is_active" class="form-control">
+            <option value="">All Status</option>
+            <option value="true" {% if is_active %}selected{% endif %}>Active</option>
+            <option value="false" {% if is_active == false %}selected{% endif %}>Inactive</option>
+        </select>
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" name="owner_id" value="{{ owner_id or '' }}" placeholder="Owner ID">
+    </div>
+    <div class="col">
+        <button class="btn btn-secondary" type="submit">Filter</button>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th><a href="?sort=name">Name</a></th>
+            <th>Description</th>
+            <th>Owner ID</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for app in apps %}
+        <tr>
+            <td>{{ app.name }}</td>
+            <td>{{ app.description }}</td>
+            <td>{{ app.owner_id }}</td>
+            <td>
+                {% if app.is_active %}
+                    <span class="badge bg-success">Active</span>
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="/admin/apps/{{ app.id }}/edit" class="btn btn-sm btn-info">Edit</a>
+                <a href="/admin/apps/{{ app.id }}/toggle" class="btn btn-sm btn-warning">Toggle</a>
+                <a href="/admin/apps/{{ app.id }}/delete" onclick="return confirm('Are you sure?')" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-3">
+        <a href="/admin/apps/create" class="btn btn-primary mb-3">Create App</a>
+    </div>
+    <div class="col-9">
+        <nav>
+            <ul class="pagination float-end">
+                {% for page_num in range(1, pagination.total_pages + 1) %}
+                <li class="page-item {% if page_num == pagination.current_page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}{% if search %}&search={{ search }}{% endif %}">{{ page_num }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+{% endblock %}

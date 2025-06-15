@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Welcome to documenter ai admin panel{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/static/css/toastr.min.css" rel="stylesheet" />
+    <link href="/static/css/style.css" rel="stylesheet" />
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <button class="btn btn-outline-light" id="toggleSidebar">
+                ☰ Admin Panel
+            </button>
+            <a href="#" class="navbar-text text-white ms-3" style="text-decoration: none;">
+                Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar bg-dark" id="sidebar">
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/users">Users</a>
+        <a href="/admin/packages">Packages</a>
+        <a href="/admin/apps">Apps</a>
+        <a href="/admin/api-docs">API Documentation</a>
+        <a href="/admin/subscriptions">Subscriptions</a>
+        <a href="/admin/transactions">Transactions</a>
+        <a href="/admin/histories">Histories</a>
+        <a href="/admin/logs">Logs</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content" id="mainContent">
+        <div class="container-fluid mt-4">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script src="/static/js/jquery-3.6.0.min.js"></script>
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/toastr.min.js"></script>
+    <script src="/static/js/script.js"></script>
+
+    <script>
+        $('#toggleSidebar').on('click', function () {
+            $('#sidebar').toggleClass('sidebar-collapsed');
+            $('#mainContent').toggleClass('content-collapsed');
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

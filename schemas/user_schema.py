@@ -1,4 +1,5 @@
 # schemas/user_schema.py
+from bson import ObjectId
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
 from datetime import datetime
@@ -21,7 +22,7 @@ class UserStatusUpdate(BaseModel):
     is_active: bool
 
 class UserInDB(UserBase):
-    _id: str
+    id: str = Field(..., alias="_id")
     is_active: bool
     created_at: datetime
     updated_at: datetime

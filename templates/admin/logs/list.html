@@ -1,0 +1,70 @@
+{% extends "admin/layout.html" %}
+{% block title %}Logs List{% endblock %}
+
+{% block content %}
+<h4 class="manage-heading">LOGS</h4>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col">
+        <select name="type" class="form-control">
+            <option value="">All Types</option>
+            <option value="info" {% if type == "info" %}selected{% endif %}>Info</option>
+            <option value="warning" {% if type == "warning" %}selected{% endif %}>Warning</option>
+            <option value="error" {% if type == "error" %}selected{% endif %}>Error</option>
+        </select>
+    </div>
+    <div class="col">
+        <input type="text" class="form-control" name="created_by" value="{{ created_by or '' }}" placeholder="Created By">
+    </div>
+    <div class="col">
+        <button class="btn btn-secondary" type="submit">Filter</button>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Created By</th>
+            <th>Message</th>
+            <th>Timestamp</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>
+                <span class="badge
+                    {% if log.type == 'error' %}bg-danger
+                    {% elif log.type == 'warning' %}bg-warning
+                    {% else %}bg-info{% endif %}">
+                    {{ log.type|title }}
+                </span>
+            </td>
+            <td>{{ log.created_by }}</td>
+            <td>{{ log.details.message|truncate(50) if log.details.message else 'N/A' }}</td>
+            <td>{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>
+                <a href="/admin/logs/{{ log.id }}" class="btn btn-sm btn-info">Details</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-12">
+        <nav>
+            <ul class="pagination float-end">
+                {% for page_num in range(1, pagination.total_pages + 1) %}
+                <li class="page-item {% if page_num == pagination.current_page %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}{% if type %}&type={{ type }}{% endif %}">{{ page_num }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+{% endblock %}

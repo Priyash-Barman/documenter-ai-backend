@@ -1,0 +1,62 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ "Edit" if api_doc else "Create" }} API Doc{% endblock %}
+
+{% block content %}
+<h4 class="manage-heading">{{ "Edit" if api_doc else "Create" }} API Doc</h4>
+
+<form method="post" id="apiDocForm">
+    <div class="mb-3">
+        <label>URL</label>
+        <input type="text" class="form-control" name="url" value="{{ api_doc.url if api_doc else '' }}" required>
+    </div>
+    <div class="mb-3">
+        <label>Method</label>
+        <select class="form-control" name="method" required>
+            <option value="GET" {% if api_doc and api_doc.method == "GET" %}selected{% endif %}>GET</option>
+            <option value="POST" {% if api_doc and api_doc.method == "POST" %}selected{% endif %}>POST</option>
+            <option value="PUT" {% if api_doc and api_doc.method == "PUT" %}selected{% endif %}>PUT</option>
+            <option value="DELETE" {% if api_doc and api_doc.method == "DELETE" %}selected{% endif %}>DELETE</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label>Payload</label>
+        <textarea class="form-control" name="payload" rows="3">{{ api_doc.payload if api_doc else '' }}</textarea>
+    </div>
+    <div class="mb-3">
+        <label>Response</label>
+        <textarea class="form-control" name="response" rows="3">{{ api_doc.response if api_doc else '' }}</textarea>
+    </div>
+    <div class="mb-3">
+        <label>Authentication</label>
+        <input type="text" class="form-control" name="authentication" value="{{ api_doc.authentication if api_doc else '' }}">
+    </div>
+    <div class="mb-3">
+        <label>Description</label>
+        <textarea class="form-control" name="description" required>{{ api_doc.description if api_doc else '' }}</textarea>
+    </div>
+    <div class="mb-3">
+        <label>Demo URL</label>
+        <input type="text" class="form-control" name="demo_url" value="{{ api_doc.demo_url if api_doc else '' }}">
+    </div>
+    <div class="mb-3">
+        <label>Created By</label>
+        <input type="text" class="form-control" name="created_by" value="{{ api_doc.created_by if api_doc else '' }}" required>
+    </div>
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" name="is_active" id="is_active" {% if api_doc and api_doc.is_active or not api_doc %}checked{% endif %}>
+        <label class="form-check-label" for="is_active">Active</label>
+    </div>
+    <button type="submit" class="btn btn-success">Submit</button>
+    <a href="/admin/api-docs" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('#apiDocForm').on('submit', function () {
+            toastr.success("Submitted!");
+        });
+    });
+</script>
+{% endblock %}

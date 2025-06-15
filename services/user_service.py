@@ -3,6 +3,7 @@ from bson import ObjectId
 from typing import Optional, Dict, List, Tuple
 from datetime import datetime
 from schemas.user_schema import UserInDB, UserCreate, UserUpdate
+from utils.logger import logger
 
 class UserService:
     def __init__(self, mongo):
@@ -57,13 +58,19 @@ class UserService:
             "total_items": total
         }
 
+        for user in users:
+            user["_id"] = str(user["_id"])
+
         return [UserInDB(**user) for user in users], pagination
 
     async def get_user_by_id(self, user_id: str) -> Optional[UserInDB]:
         try:
             user = await self.users_collection.find_one({"_id": ObjectId(user_id)})
+            logger.info("User data fetched successfully")
+            user["_id"] = str(user["_id"])
             return UserInDB(**user) if user else None
-        except:
+        except Exception as e:
+            logger.error(str(e))
             return None
 
     async def create_new_user(self, user_data: UserCreate) -> UserInDB:
@@ -82,6 +89,7 @@ class UserService:
         # Insert and return created user
         result = await self.users_collection.insert_one(user_dict)
         created_user = await self.users_collection.find_one({"_id": result.inserted_id})
+        created_user["_id"]=str(created_user["_id"])
         return UserInDB(**created_user)
 
     async def update_user_details(self, user_id: str, user_data: UserUpdate) -> Optional[UserInDB]:
@@ -98,6 +106,7 @@ class UserService:
         )
 
         updated_user = await self.users_collection.find_one({"_id": ObjectId(user_id)})
+        updated_user["_id"] = str(updated_user["_id"])
         return UserInDB(**updated_user) if updated_user else None
 
     async def change_user_status(self, user_id: str, is_active: bool) -> Optional[UserInDB]:
@@ -110,6 +119,7 @@ class UserService:
         )
 
         updated_user = await self.users_collection.find_one({"_id": ObjectId(user_id)})
+        updated_user["_id"] = str(updated_user["_id"])
         return UserInDB(**updated_user) if updated_user else None
 
     async def remove_user(self, user_id: str) -> bool:

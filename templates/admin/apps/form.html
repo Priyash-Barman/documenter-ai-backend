@@ -1,0 +1,37 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ "Edit" if app else "Create" }} App{% endblock %}
+
+{% block content %}
+<h4 class="manage-heading">{{ "Edit" if app else "Create" }} App</h4>
+
+<form method="post" id="appForm">
+    <div class="mb-3">
+        <label>Name</label>
+        <input type="text" class="form-control" name="name" value="{{ app.name if app else '' }}" required>
+    </div>
+    <div class="mb-3">
+        <label>Description</label>
+        <textarea class="form-control" name="description" required>{{ app.description if app else '' }}</textarea>
+    </div>
+    <div class="mb-3">
+        <label>Owner ID</label>
+        <input type="text" class="form-control" name="owner_id" value="{{ app.owner_id if app else '' }}" required>
+    </div>
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" name="is_active" id="is_active" {% if app and app.is_active or not app %}checked{% endif %}>
+        <label class="form-check-label" for="is_active">Active</label>
+    </div>
+    <button type="submit" class="btn btn-success">Submit</button>
+    <a href="/admin/apps" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('#appForm').on('submit', function () {
+            toastr.success("Submitted!");
+        });
+    });
+</script>
+{% endblock %}
