@@ -1,4 +1,5 @@
 from services.auth_service import AuthService
+from services.converter_service import ConverterService
 from services.package_service import PackageService
 from services.user_service import UserService
 from services.app_service import AppService
@@ -20,5 +21,6 @@ class ServiceContainer:
         self.history_service = HistoryService(mongo)
         self.log_service = LogService(mongo)
         self.auth_service = AuthService(mongo)
+        self.converter_service = ConverterService(mongo)
 
 services = ServiceContainer()
