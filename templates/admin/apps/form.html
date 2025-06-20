@@ -13,10 +13,6 @@
         <label>Description</label>
         <textarea class="form-control" name="description" required>{{ app.description if app else '' }}</textarea>
     </div>
-    <div class="mb-3">
-        <label>Owner ID</label>
-        <input type="text" class="form-control" name="owner_id" value="{{ app.owner_id if app else '' }}" required>
-    </div>
     <div class="mb-3 form-check">
         <input type="checkbox" class="form-check-input" name="is_active" id="is_active" {% if app and app.is_active or not app %}checked{% endif %}>
         <label class="form-check-label" for="is_active">Active</label>

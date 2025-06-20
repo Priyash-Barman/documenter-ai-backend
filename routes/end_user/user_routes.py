@@ -1,7 +1,8 @@
 # routes/user_routes.py
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, status, Request
 from typing import Optional
 
+from decorators.authenticator import login_required
 from services import services
 from decorators.catch_error import catch_error
 from schemas.user_schema import UserInDB, UserCreate, UserUpdate, UserStatusUpdate
@@ -12,7 +13,9 @@ router = APIRouter(prefix="/users")
 
 @router.get("/", response_model=SuccessDataPaginated[UserInDB])
 @catch_error
+@login_required("admin")
 async def list_users(
+        request: Request,
         page: int = Query(1, ge=1),
         limit: int = Query(10, ge=1, le=100),
         search: Optional[str] = Query(None, min_length=2),
@@ -46,7 +49,8 @@ async def list_users(
 
 @router.get("/{user_id}", response_model=SuccessData[UserInDB])
 @catch_error
-async def get_user(user_id: str):
+@login_required("admin")
+async def get_user(request: Request, user_id: str):
     """
     Get a specific user by ID
     """
@@ -67,7 +71,8 @@ async def get_user(user_id: str):
 
 @router.post("/", response_model=SuccessData[UserInDB], status_code = status.HTTP_201_CREATED)
 @catch_error
-async def create_user(user_data: UserCreate):
+@login_required("admin")
+async def create_user(request: Request, user_data: UserCreate):
     """
     Create a new user
     """
@@ -90,7 +95,8 @@ async def create_user(user_data: UserCreate):
 
 @router.put("/{user_id}", response_model=SuccessData[UserInDB])
 @catch_error
-async def update_user(user_id: str, user_data: UserUpdate):
+@login_required("admin")
+async def update_user(request: Request, user_id: str, user_data: UserUpdate):
     """
     Update user details
     """
@@ -111,7 +117,8 @@ async def update_user(user_id: str, user_data: UserUpdate):
 
 @router.patch("/{user_id}/status", response_model=SuccessData[UserInDB])
 @catch_error
-async def update_user_status(user_id: str, status_data: UserStatusUpdate):
+@login_required("admin")
+async def update_user_status(request: Request, user_id: str, status_data: UserStatusUpdate):
     """
     Update user active status
     """
@@ -132,7 +139,8 @@ async def update_user_status(user_id: str, status_data: UserStatusUpdate):
 
 @router.delete("/{user_id}", response_model=SuccessResponse)
 @catch_error
-async def delete_user(user_id: str):
+@login_required("admin")
+async def delete_user(request: Request, user_id: str):
     """
     Delete a user
     """

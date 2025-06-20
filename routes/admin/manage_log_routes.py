@@ -1,9 +1,10 @@
 # routes/manage_log_routes.py
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Request, Query, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from typing import Optional
 
+from decorators.authenticator import login_required
 from services import services
 from decorators.catch_error import catch_error
 
@@ -12,6 +13,7 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/", name="log:list")
 @catch_error
+@login_required("admin")
 async def list_logs(
     request: Request,
     page: int = Query(1, ge=1),
@@ -39,6 +41,7 @@ async def list_logs(
 
 @router.get("/{log_id}", name="log:detail")
 @catch_error
+@login_required("admin")
 async def log_detail(request: Request, log_id: str):
     log = await services.log_service.get_log_by_id(log_id)
     if not log:

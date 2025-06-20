@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi import status
 from typing import Optional
 
+from decorators.authenticator import login_required
 from services import services
 from schemas.user_schema import UserCreate, UserUpdate, UserRole
 from decorators.catch_error import catch_error
@@ -14,6 +15,7 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/", name="user:list")
 @catch_error
+@login_required("admin")
 async def list_users(
     request: Request,
     page: int = Query(1, ge=1),
@@ -51,6 +53,7 @@ async def list_users(
 
 @router.get("/create", name="user:create_form")
 @catch_error
+@login_required("admin")
 async def create_user_form(request: Request):
     return templates.TemplateResponse("admin/users/form.html", {
         "request": request,
@@ -62,14 +65,13 @@ async def create_user_form(request: Request):
 
 @router.post("/create", name="user:create")
 @catch_error
+@login_required("admin")
 async def create_user(
     request: Request,
     full_name: str = Form(...),
     email: str = Form(...),
-    role: UserRole = Form(...),
-    password: str = Form(...),
 ):
-    user_data = UserCreate(full_name=full_name, email=email, role=role, password=password)
+    user_data = UserCreate(full_name=full_name, email=email, role=UserRole.ADMIN)
     try:
         await services.user_service.create_new_user(user_data)
     except ValueError:
@@ -81,6 +83,7 @@ async def create_user(
 
 @router.get("/{user_id}/edit", name="user:edit_form")
 @catch_error
+@login_required("admin")
 async def edit_user_form(request: Request, user_id: str):
     user = await services.user_service.get_user_by_id(user_id)
     if not user:
@@ -96,28 +99,30 @@ async def edit_user_form(request: Request, user_id: str):
 
 @router.post("/{user_id}/edit", name="user:update")
 @catch_error
+@login_required("admin")
 async def update_user(
     request: Request,
     user_id: str,
     full_name: str = Form(...),
     email: str = Form(...),
-    role: UserRole = Form(...)
 ):
-    user_data = UserUpdate(full_name=full_name, email=email, role=role)
+    user_data = UserUpdate(full_name=full_name, email=email)
     await services.user_service.update_user_details(user_id, user_data)
     return RedirectResponse(url="/admin/users", status_code=status.HTTP_302_FOUND)
 
 
 @router.get("/{user_id}/delete", name="user:delete")
 @catch_error
-async def delete_user(user_id: str):
+@login_required("admin")
+async def delete_user(request:Request, user_id: str):
     await services.user_service.remove_user(user_id)
     return RedirectResponse(url="/admin/users", status_code=status.HTTP_302_FOUND)
 
 
 @router.get("/{user_id}/toggle", name="user:toggle_status")
 @catch_error
-async def toggle_user_status(user_id: str):
+@login_required("admin")
+async def toggle_user_status(request: Request, user_id: str):
     user = await services.user_service.get_user_by_id(user_id)
     if user:
         await services.user_service.change_user_status(user_id, not user.is_active)

@@ -1,9 +1,10 @@
 # routes/manage_transaction_routes.py
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Request, Query, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from typing import Optional
 
+from decorators.authenticator import login_required
 from services import services
 from decorators.catch_error import catch_error
 
@@ -12,6 +13,7 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/", name="transaction:list")
 @catch_error
+@login_required("admin")
 async def list_transactions(
     request: Request,
     page: int = Query(1, ge=1),
@@ -39,6 +41,7 @@ async def list_transactions(
 
 @router.get("/{tx_id}", name="transaction:detail")
 @catch_error
+@login_required("admin")
 async def transaction_detail(request: Request, tx_id: str):
     transaction = await services.transaction_service.get_transaction_by_id(tx_id)
     if not transaction:
@@ -51,6 +54,7 @@ async def transaction_detail(request: Request, tx_id: str):
 
 @router.get("/{tx_id}/update-status", name="transaction:update_status")
 @catch_error
-async def update_transaction_status(tx_id: str, status: str):
-    await services.transaction_service.update_transaction_status(tx_id, status)
+@login_required("admin")
+async def update_transaction_status(request: Request, tx_id: str, tx_status: str):
+    await services.transaction_service.update_transaction_status(tx_id, tx_status)
     return RedirectResponse(url=f"/admin/transactions/{tx_id}", status_code=status.HTTP_302_FOUND)

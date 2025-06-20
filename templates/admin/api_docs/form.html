@@ -38,10 +38,6 @@
         <label>Demo URL</label>
         <input type="text" class="form-control" name="demo_url" value="{{ api_doc.demo_url if api_doc else '' }}">
     </div>
-    <div class="mb-3">
-        <label>Created By</label>
-        <input type="text" class="form-control" name="created_by" value="{{ api_doc.created_by if api_doc else '' }}" required>
-    </div>
     <div class="mb-3 form-check">
         <input type="checkbox" class="form-check-input" name="is_active" id="is_active" {% if api_doc and api_doc.is_active or not api_doc %}checked{% endif %}>
         <label class="form-check-label" for="is_active">Active</label>

@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi import status
 from typing import Optional
 
+from decorators.authenticator import login_required
 from services import services
 from schemas.api_doc_schema import ApiDocCreate, ApiDocUpdate
 from decorators.catch_error import catch_error
@@ -14,6 +15,7 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/", name="api_doc:list")
 @catch_error
+@login_required("admin")
 async def list_api_docs(
     request: Request,
     page: int = Query(1, ge=1),
@@ -45,6 +47,7 @@ async def list_api_docs(
 
 @router.get("/create", name="api_doc:create_form")
 @catch_error
+@login_required("admin")
 async def create_api_doc_form(request: Request):
     return templates.TemplateResponse("admin/api_docs/form.html", {
         "request": request,
@@ -55,6 +58,7 @@ async def create_api_doc_form(request: Request):
 
 @router.post("/create", name="api_doc:create")
 @catch_error
+@login_required("admin")
 async def create_api_doc(
     request: Request,
     url: str = Form(...),
@@ -64,7 +68,6 @@ async def create_api_doc(
     authentication: str = Form(...),
     description: str = Form(...),
     demo_url: str = Form(...),
-    created_by: str = Form(...),
     is_active: bool = Form(False)
 ):
     api_doc_data = ApiDocCreate(
@@ -75,7 +78,7 @@ async def create_api_doc(
         authentication=authentication,
         description=description,
         demo_url=demo_url,
-        created_by=created_by,
+        created_by=str(request.state.user.id),
         is_active=is_active
     )
     await services.api_doc_service.create_new_api_doc(api_doc_data)
@@ -83,6 +86,7 @@ async def create_api_doc(
 
 @router.get("/{doc_id}/edit", name="api_doc:edit_form")
 @catch_error
+@login_required("admin")
 async def edit_api_doc_form(request: Request, doc_id: str):
     api_doc = await services.api_doc_service.get_api_doc_by_id(doc_id)
     if not api_doc:
@@ -97,6 +101,7 @@ async def edit_api_doc_form(request: Request, doc_id: str):
 
 @router.post("/{doc_id}/edit", name="api_doc:update")
 @catch_error
+@login_required("admin")
 async def update_api_doc(
     request: Request,
     doc_id: str,
@@ -124,6 +129,7 @@ async def update_api_doc(
 
 @router.get("/{doc_id}/delete", name="api_doc:delete")
 @catch_error
-async def delete_api_doc(doc_id: str):
+@login_required("admin")
+async def delete_api_doc(request: Request, doc_id: str):
     await services.api_doc_service.remove_api_doc(doc_id)
     return RedirectResponse(url="/admin/api-docs", status_code=status.HTTP_302_FOUND)

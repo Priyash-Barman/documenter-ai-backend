@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi import status
 from typing import Optional
 
+from decorators.authenticator import login_required
 from services import services
 from schemas.package_schema import PackageCreate, PackageUpdate
 from decorators.catch_error import catch_error
@@ -14,6 +15,7 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/", name="package:list")
 @catch_error
+@login_required("admin")
 async def list_packages(
     request: Request,
     page: int = Query(1, ge=1),
@@ -50,6 +52,7 @@ async def list_packages(
 
 @router.get("/create", name="package:create_form")
 @catch_error
+@login_required("admin")
 async def create_package_form(request: Request):
     return templates.TemplateResponse("admin/packages/form.html", {
         "request": request,
@@ -60,6 +63,7 @@ async def create_package_form(request: Request):
 
 @router.post("/create", name="package:create")
 @catch_error
+@login_required("admin")
 async def create_package(
     request: Request,
     name: str = Form(...),
@@ -82,6 +86,7 @@ async def create_package(
 
 @router.get("/{package_id}/edit", name="package:edit_form")
 @catch_error
+@login_required("admin")
 async def edit_package_form(request: Request, package_id: str):
     package = await services.package_service.get_package_by_id(package_id)
     if not package:
@@ -96,6 +101,7 @@ async def edit_package_form(request: Request, package_id: str):
 
 @router.post("/{package_id}/edit", name="package:update")
 @catch_error
+@login_required("admin")
 async def update_package(
     request: Request,
     package_id: str,
@@ -115,13 +121,15 @@ async def update_package(
 
 @router.get("/{package_id}/delete", name="package:delete")
 @catch_error
-async def delete_package(package_id: str):
+@login_required("admin")
+async def delete_package(request: Request, package_id: str):
     await services.package_service.remove_package(package_id)
     return RedirectResponse(url="/admin/packages", status_code=status.HTTP_302_FOUND)
 
 @router.get("/{package_id}/toggle", name="package:toggle_status")
 @catch_error
-async def toggle_package_status(package_id: str):
+@login_required("admin")
+async def toggle_package_status(request: Request, package_id: str):
     package = await services.package_service.get_package_by_id(package_id)
     if package:
         await services.package_service.change_package_status(package_id, not package.is_active)
