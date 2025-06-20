@@ -1,58 +1,177 @@
 from datetime import datetime, timedelta
-from jose import jwt, JWTError
-from passlib.context import CryptContext
-from fastapi import HTTPException, status, Depends
-from fastapi.security import OAuth2PasswordBearer
-from schemas.user_schema import UserCreate
-from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from typing import Optional, Tuple
+from cachetools import TTLCache
+from jose import JWTError
+
+from config import SECRET_KEY, ALGORITHM
+from schemas.user_schema import UserInDB
+from utils.jwt_utils import create_access_token
+from utils.email_utils import EmailSender
+from utils.common_utils import generate_otp
+from utils.logger import logger
+import jwt
+from fastapi import status, HTTPException
+
+# Configure caches
+otp_cache = TTLCache(maxsize=1000, ttl=600)  # 10 minutes for OTP
+resend_cache = TTLCache(maxsize=1000, ttl=30)  # 30 sec cooldown
 
 
 class AuthService:
-    oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+    def __init__(self, mongo):
+        self.users_collection = mongo["users"]
+        self.email_sender = EmailSender()
 
-    def __init__(self, db):
-        self.collection = db["users"]
-        self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    async def can_resend_otp(self, email: str) -> Tuple[bool, int]:
+        """Check if OTP can be resent and return remaining cooldown seconds"""
+        if email not in resend_cache:
+            return True, 0
 
-    def get_password_hash(self, password: str) -> str:
-        return self.pwd_context.hash(password)
+        remaining = (resend_cache[email] - datetime.utcnow()).total_seconds()
+        return False, max(0, int(remaining))
 
-    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        return self.pwd_context.verify(plain_password, hashed_password)
-
-    def create_access_token(self, data: dict) -> str:
-        to_encode = data.copy()
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        to_encode.update({"exp": expire})
-        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-    async def create_user(self, user: UserCreate):
-        user_dict = user.dict()
-        user_dict["hashed_password"] = self.get_password_hash(user_dict.pop("password"))
-        await self.collection.insert_one(user_dict)
-        user_dict.pop("hashed_password")
-        return user_dict
-
-    async def authenticate_user(self, email: str, password: str):
-        user = await self.collection.find_one({"email": email})
-        if user and self.verify_password(password, user["hashed_password"]):
-            return user
-        return None
-
-    async def get_current_user(self, token: str = Depends(oauth2_scheme)):
-        credentials_exception = HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    async def send_login_otp(self, email: str) -> bool:
+        """Send OTP to user's email for authentication"""
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            email: str = payload.get("sub")
-            if email is None:
-                raise credentials_exception
-        except JWTError:
-            raise credentials_exception
-        user = await self.collection.find_one({"email": email})
-        if user is None:
-            raise credentials_exception
-        return user
+            # Check resend cooldown
+            can_resend, _ = await self.can_resend_otp(email)
+            if not can_resend:
+                logger.warning(f"Resend attempt too soon for {email}")
+                return False
+
+            otp = generate_otp()
+            expires_at = datetime.utcnow() + timedelta(minutes=5)
+
+            otp_cache[email] = {
+                "otp": otp,
+                "expires_at": expires_at,
+                "attempts": 0
+            }
+
+            # Set resend cooldown
+            resend_cache[email] = datetime.utcnow() + timedelta(minutes=3)
+
+            subject = "Your Login Verification Code"
+            body = f"Your OTP is: {otp}. Valid for 5 minutes."
+
+            await self.email_sender.send_mail(email, subject, body)
+            logger.info(f"OTP sent to {email} - {otp}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to send OTP to {email}: {str(e)}")
+            return False
+
+    async def verify_otp(
+            self,
+            email: str,
+            otp: str
+    ) -> Tuple[bool, Optional[UserInDB]]:
+        """Verify OTP and return (success, user) tuple"""
+        try:
+            stored = otp_cache.get(email)
+
+            if not stored:
+                logger.warning(f"No OTP found for {email}")
+                return False, None
+
+            if datetime.utcnow() > stored["expires_at"]:
+                logger.warning(f"Expired OTP attempt for {email}")
+                return False, None
+
+            if stored["otp"] != otp:
+                stored["attempts"] += 1
+                logger.warning(f"Invalid OTP attempt for {email}")
+                return False, None
+
+            # OTP verified, check if user exists
+            user = await self.users_collection.find_one({"email": email})
+
+            if user:
+                user["_id"] = str(user["_id"])
+                return True, UserInDB(**user)
+
+            return True, None
+
+        except Exception as e:
+            logger.error(f"OTP verification failed for {email}: {str(e)}")
+            return False, None
+
+    async def create_new_user(
+            self,
+            email: str,
+            full_name: str
+    ) -> UserInDB:
+        """Create new user with verified email"""
+        try:
+            if await self.users_collection.find_one({"email": email}):
+                raise ValueError("Email already registered")
+
+            user_data = {
+                "email": email,
+                "full_name": full_name,
+                "is_active": True,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }
+
+            result = await self.users_collection.insert_one(user_data)
+            created_user = await self.users_collection.find_one(
+                {"_id": result.inserted_id}
+            )
+
+            created_user["_id"] = str(created_user["_id"])
+            logger.info(f"New user created: {email}")
+            return UserInDB(**created_user)
+
+        except Exception as e:
+            logger.error(f"Failed to create user {email}: {str(e)}")
+            raise
+
+    async def generate_auth_token(self, email: str) -> str:
+        """Generate JWT token for authenticated user"""
+        try:
+            token = create_access_token({"sub": email})
+            logger.info(f"Token generated for {email}")
+            return token
+        except Exception as e:
+            logger.error(f"Token generation failed for {email}: {str(e)}")
+            raise
+
+    def verify_token(self, token: str) -> dict:
+        """
+        Verify JWT token and return payload if valid
+
+        Args:
+            token: JWT token to verify
+
+        Returns:
+            dict: Decoded token payload
+
+        Raises:
+            HTTPException: If token is invalid or expired
+        """
+        try:
+            # Decode the token using your secret key and algorithm
+            payload = jwt.decode(
+                token,
+                SECRET_KEY,  # Your secret key from settings
+                algorithms=[ALGORITHM]  # Typically "HS256"
+            )
+
+            # Check if token is expired
+            expire = payload.get("exp")
+            if expire is None or datetime.utcnow() > datetime.fromtimestamp(expire):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Token has expired"
+                )
+
+            return payload
+
+        except JWTError as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )

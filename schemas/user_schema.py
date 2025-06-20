@@ -11,7 +11,9 @@ class UserBase(BaseModel):
     role: UserRole = UserRole.END_USER
 
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=8)
+    full_name: str = Field(None, min_length=2, max_length=100)
+    email: EmailStr = None
+    role: Optional[UserRole] = None
 
 class UserUpdate(BaseModel):
     full_name: Optional[str] = Field(None, min_length=2, max_length=100)

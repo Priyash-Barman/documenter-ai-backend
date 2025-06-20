@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .min-vh-80 {
+            min-height: 80vh;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container d-flex justify-content-center align-items-center min-vh-80">
+        <div class="card shadow-sm w-100" style="max-width: 400px;">
+            <div class="card-body p-4">
+
+                <!-- Email Step -->
+                <div class="step {% if step == 'email' %}d-block{% else %}d-none{% endif %}" id="email-step">
+                    <h1 class="text-primary text-center mb-4">Welcome Back</h1>
+                    <form method="post" action="/send-otp">
+                        <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">Send OTP</button>
+                    </form>
+                </div>
+
+                <!-- OTP Step -->
+                <div class="step {% if step == 'otp' %}d-block{% else %}d-none{% endif %}" id="otp-step">
+                    <h1 class="text-primary text-center mb-4">Verify OTP</h1>
+                    <p class="text-muted text-center mb-3">OTP sent to <strong>{{ email }}</strong></p>
+                    {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endif %}
+                    <form method="post" action="/verify-otp">
+                        <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
+                        <input type="hidden" name="email" value="{{ email }}">
+                        <div class="mb-3">
+                            <label for="otp" class="form-label">Enter 6-digit OTP</label>
+                            <input type="text" class="form-control" id="otp" name="otp"
+                                   required pattern="\d{6}" title="Please enter a 6-digit code">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2 mb-3">Verify</button>
+                        <button type="button" id="resend-btn" class="btn btn-outline-secondary w-100 py-2"
+                                {% if resend_cooldown and resend_cooldown > 0 %}disabled{% endif %}>
+                            Resend OTP
+                            {% if resend_cooldown and resend_cooldown > 0 %}
+                            (<span id="countdown">{{ resend_cooldown }}</span>s)
+                            {% endif %}
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Name Step -->
+                <div class="step {% if step == 'name' %}d-block{% else %}d-none{% endif %}" id="name-step">
+                    <h1 class="text-primary text-center mb-4">Complete Registration</h1>
+                    <p class="text-muted text-center mb-3">Registering as <strong>{{ email }}</strong></p>
+                    {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endif %}
+                    <form method="post" action="/complete-registration">
+                        <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
+                        <input type="hidden" name="email" value="{{ email }}">
+                        <div class="mb-3">
+                            <label for="full_name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">Continue</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle resend button functionality
+            const resendBtn = document.getElementById('resend-btn');
+            if (resendBtn) {
+                resendBtn.addEventListener('click', function() {
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/send-otp';
+
+                    const emailInput = document.createElement('input');
+                    emailInput.type = 'hidden';
+                    emailInput.name = 'email';
+                    emailInput.value = '{{ email }}';
+
+                    const redirectInput = document.createElement('input');
+                    redirectInput.type = 'hidden';
+                    redirectInput.name = 'redirect_uri';
+                    redirectInput.value = '{{ redirect_uri }}';
+
+                    form.appendChild(emailInput);
+                    form.appendChild(redirectInput);
+                    document.body.appendChild(form);
+                    form.submit();
+                });
+
+                // Handle countdown if present
+                const countdownEl = document.getElementById('countdown');
+                if (countdownEl) {
+                    let seconds = parseInt(countdownEl.textContent);
+                    const timer = setInterval(function() {
+                        seconds--;
+                        countdownEl.textContent = seconds;
+                        if (seconds <= 0) {
+                            clearInterval(timer);
+                            resendBtn.disabled = false;
+                            resendBtn.innerHTML = 'Resend OTP';
+                        }
+                    }, 1000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

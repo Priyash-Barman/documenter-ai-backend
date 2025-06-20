@@ -1,9 +1,10 @@
 # routes/manage_history_routes.py
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Request, Query, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from typing import Optional
 
+from decorators.authenticator import login_required
 from services import services
 from decorators.catch_error import catch_error
 
@@ -12,6 +13,7 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/", name="history:list")
 @catch_error
+@login_required("admin")
 async def list_histories(
     request: Request,
     page: int = Query(1, ge=1),
@@ -43,6 +45,7 @@ async def list_histories(
 
 @router.get("/{history_id}", name="history:detail")
 @catch_error
+@login_required("admin")
 async def history_detail(request: Request, history_id: str):
     history = await services.history_service.get_history_by_id(history_id)
     if not history:

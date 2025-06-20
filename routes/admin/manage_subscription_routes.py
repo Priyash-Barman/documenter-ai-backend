@@ -6,6 +6,7 @@ from fastapi import status
 from typing import Optional
 from datetime import datetime
 
+from decorators.authenticator import login_required
 from services import services
 from decorators.catch_error import catch_error
 
@@ -14,6 +15,7 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/", name="subscription:list")
 @catch_error
+@login_required("admin")
 async def list_subscriptions(
     request: Request,
     page: int = Query(1, ge=1),
@@ -45,6 +47,7 @@ async def list_subscriptions(
 
 @router.get("/{sub_id}", name="subscription:detail")
 @catch_error
+@login_required("admin")
 async def subscription_detail(request: Request, sub_id: str):
     subscription = await services.subscription_service.get_subscription_by_id(sub_id)
     if not subscription:
@@ -57,6 +60,7 @@ async def subscription_detail(request: Request, sub_id: str):
 
 @router.get("/{sub_id}/cancel", name="subscription:cancel")
 @catch_error
-async def cancel_subscription(sub_id: str):
+@login_required("admin")
+async def cancel_subscription(request: Request, sub_id: str):
     await services.subscription_service.cancel_subscription(sub_id, datetime.utcnow())
     return RedirectResponse(url=f"/admin/subscriptions/{sub_id}", status_code=status.HTTP_302_FOUND)

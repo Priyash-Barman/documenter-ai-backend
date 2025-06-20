@@ -73,6 +73,16 @@ class UserService:
             logger.error(str(e))
             return None
 
+    async def get_user_by_email(self, email: str) -> Optional[UserInDB]:
+        try:
+            user = await self.users_collection.find_one({"email": email})
+            logger.info("User data fetched successfully")
+            user["_id"] = str(user["_id"])
+            return UserInDB(**user) if user else None
+        except Exception as e:
+            logger.error(str(e))
+            return None
+
     async def create_new_user(self, user_data: UserCreate) -> UserInDB:
         # Check for existing user
         if await self.users_collection.find_one({"email": user_data.email}):

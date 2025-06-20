@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi import status
 from typing import Optional
 
+from decorators.authenticator import login_required
 from services import services
 from schemas.app_schema import AppCreate, AppUpdate
 from decorators.catch_error import catch_error
@@ -14,6 +15,7 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/", name="app:list")
 @catch_error
+@login_required("admin")
 async def list_apps(
     request: Request,
     page: int = Query(1, ge=1),
@@ -45,6 +47,7 @@ async def list_apps(
 
 @router.get("/create", name="app:create_form")
 @catch_error
+@login_required("admin")
 async def create_app_form(request: Request):
     return templates.TemplateResponse("admin/apps/form.html", {
         "request": request,
@@ -55,17 +58,17 @@ async def create_app_form(request: Request):
 
 @router.post("/create", name="app:create")
 @catch_error
+@login_required("admin")
 async def create_app(
     request: Request,
     name: str = Form(...),
     description: str = Form(...),
-    owner_id: str = Form(...),
     is_active: bool = Form(False)
 ):
     app_data = AppCreate(
         name=name,
         description=description,
-        owner_id=owner_id,
+        owner_id=str(request.state.user.id),
         is_active=is_active
     )
     try:
@@ -77,6 +80,7 @@ async def create_app(
 
 @router.get("/{app_id}/edit", name="app:edit_form")
 @catch_error
+@login_required("admin")
 async def edit_app_form(request: Request, app_id: str):
     app = await services.app_service.get_app_by_id(app_id)
     if not app:
@@ -91,6 +95,7 @@ async def edit_app_form(request: Request, app_id: str):
 
 @router.post("/{app_id}/edit", name="app:update")
 @catch_error
+@login_required("admin")
 async def update_app(
     request: Request,
     app_id: str,
@@ -108,13 +113,15 @@ async def update_app(
 
 @router.get("/{app_id}/delete", name="app:delete")
 @catch_error
-async def delete_app(app_id: str):
+@login_required("admin")
+async def delete_app(request: Request, app_id: str):
     await services.app_service.remove_app(app_id)
     return RedirectResponse(url="/admin/apps", status_code=status.HTTP_302_FOUND)
 
 @router.get("/{app_id}/toggle", name="app:toggle_status")
 @catch_error
-async def toggle_app_status(app_id: str):
+@login_required("admin")
+async def toggle_app_status(request: Request, app_id: str):
     app = await services.app_service.get_app_by_id(app_id)
     if app:
         await services.app_service.change_app_status(app_id, not app.is_active)

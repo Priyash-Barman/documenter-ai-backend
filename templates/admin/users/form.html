@@ -13,17 +13,6 @@
         <label>Email</label>
         <input type="email" class="form-control" name="email" value="{{ user.email if user else '' }}" required>
     </div>
-    <div class="mb-3">
-        <label>Password</label>
-        <input type="password" class="form-control" name="password" value="{{ user.password if user else '' }}" required>
-    </div>
-    <div class="mb-3">
-        <label>Role</label>
-        <select class="form-control" name="role" required>
-            <option value="end_user" {% if user and user.role == "end_user" %}selected{% endif %}>End User</option>
-            <option value="admin" {% if user and user.role == "admin" %}selected{% endif %}>Admin</option>
-        </select>
-    </div>
     <button type="submit" class="btn btn-success">Submit</button>
     <a href="/admin/users" class="btn btn-secondary">Cancel</a>
 </form>

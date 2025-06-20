@@ -19,6 +19,6 @@ class ServiceContainer:
         self.subscription_service = SubscriptionService(mongo)
         self.history_service = HistoryService(mongo)
         self.log_service = LogService(mongo)
-        # self.auth_service = AuthService(mongo)
+        self.auth_service = AuthService(mongo)
 
 services = ServiceContainer()
