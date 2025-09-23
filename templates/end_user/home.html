@@ -160,18 +160,11 @@
                 <div class="model-selector me-3">
                     <div class="dropdown">
                         <button class="btn dropdown-toggle" type="button" id="modelDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-robot me-2"></i>Available Models
+                            <i class="bi bi-robot me-2"></i><span id="selectedModel">Available Models</span>
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="modelDropdown">
-                            <li><h6 class="dropdown-header">OCR Models</h6></li>
-                            <li><a class="dropdown-item" href="#">Tesseract OCR</a></li>
-                            <li><a class="dropdown-item" href="#">Google Vision</a></li>
-                            <li><a class="dropdown-item" href="#">AWS Textract</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">Document Types</h6></li>
-                            <li><a class="dropdown-item" href="#">Invoices</a></li>
-                            <li><a class="dropdown-item" href="#">Receipts</a></li>
-                            <li><a class="dropdown-item" href="#">Contracts</a></li>
+                            <li><a class="dropdown-item active" href="#" data-model="gemini">Gemini</a></li>
+                            <li><a class="dropdown-item active" href="#" data-model="gemini">GPT-4</a></li>
                         </ul>
                     </div>
                 </div>
@@ -283,12 +276,12 @@
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h6 class="mb-1">invoice_2023.pdf</h6>
-                                        <small class="text-muted">Converted 2 hours ago | Tesseract OCR</small>
+                                        <small class="text-muted">Converted 2 hours ago | Gemini</small>
                                     </div>
                                     <div>
                                         <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
                                         <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#historyModal"
-                                                onclick="showHistoryItem('invoice_2023.pdf', '2 hours ago', 'Tesseract OCR', 'invoice.jpg', 'invoice_digitized.jpg')">
+                                                onclick="showHistoryItem('invoice_2023.pdf', '2 hours ago', 'Gemini', 'invoice.jpg', 'invoice_digitized.jpg')">
                                             View
                                         </button>
                                     </div>
@@ -299,12 +292,12 @@
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h6 class="mb-1">receipt_june.jpg</h6>
-                                        <small class="text-muted">Converted yesterday | Google Vision</small>
+                                        <small class="text-muted">Converted yesterday | Gemini</small>
                                     </div>
                                     <div>
                                         <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
                                         <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#historyModal"
-                                                onclick="showHistoryItem('receipt_june.jpg', 'yesterday', 'Google Vision', 'receipt.jpg', 'receipt_digitized.jpg')">
+                                                onclick="showHistoryItem('receipt_june.jpg', 'yesterday', 'Gemini', 'receipt.jpg', 'receipt_digitized.jpg')">
                                             View
                                         </button>
                                     </div>
@@ -315,12 +308,12 @@
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h6 class="mb-1">contract_agreement.png</h6>
-                                        <small class="text-muted">Converted 3 days ago | AWS Textract</small>
+                                        <small class="text-muted">Converted 3 days ago | Gemini</small>
                                     </div>
                                     <div>
                                         <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
                                         <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#historyModal"
-                                                onclick="showHistoryItem('contract_agreement.png', '3 days ago', 'AWS Textract', 'contract.png', 'contract_digitized.png')">
+                                                onclick="showHistoryItem('contract_agreement.png', '3 days ago', 'Gemini', 'contract.png', 'contract_digitized.png')">
                                             View
                                         </button>
                                     </div>
@@ -331,12 +324,12 @@
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h6 class="mb-1">scan_document.pdf</h6>
-                                        <small class="text-muted">Converted 1 week ago | Tesseract OCR</small>
+                                        <small class="text-muted">Converted 1 week ago | Gemini</small>
                                     </div>
                                     <div>
                                         <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
                                         <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#historyModal"
-                                                onclick="showHistoryItem('scan_document.pdf', '1 week ago', 'Tesseract OCR', 'scan.jpg', 'scan_digitized.jpg')">
+                                                onclick="showHistoryItem('scan_document.pdf', '1 week ago', 'Gemini', 'scan.jpg', 'scan_digitized.jpg')">
                                             View
                                         </button>
                                     </div>
@@ -470,7 +463,7 @@
                 // Create FormData and append the file
                 const formData = new FormData();
                 formData.append('image', file);
-                formData.append('model', 'tesseract'); // Default model, can be changed from UI
+                formData.append('model', 'gemini'); // Default model, can be changed from UI
 
                 // Make API call
                 const response = await fetch('/convert', {
@@ -604,6 +597,23 @@
                 alert(`Downloading ZIP file containing ${originalImg} and ${resultImg}`);
             };
         }
+
+        // Handle model selection from the dropdown
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Get the selected model name
+                const selectedModel = this.getAttribute('data-model');
+                const selectedModelText = this.textContent;
+
+                // Update the dropdown button text
+                document.getElementById('selectedModel').textContent = selectedModelText;
+
+                // Optionally, you can store the selected model in a hidden input or variable for further use
+                console.log(`Selected model: ${selectedModel}`);
+            });
+        });
     </script>
 </body>
 </html>
