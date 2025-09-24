@@ -143,6 +143,26 @@
 
         .pagination .page-link {
             color: var(--primary-color);
+            border-radius: 6px;
+            margin: 0 2px;
+            border: 1px solid #dee2e6;
+        }
+
+        .pagination .page-link:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+
+        #paginationContainer {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e9ecef;
         }
 
         .alert-warning {
@@ -307,6 +327,15 @@
                                 <p class="mt-2 text-muted">Loading conversion history...</p>
                             </div>
                         </div>
+
+                        <!-- Pagination Controls -->
+                        <div id="paginationContainer" class="d-none">
+                            <nav aria-label="History pagination">
+                                <ul class="pagination justify-content-center mb-0" id="historyPagination">
+                                    <!-- Pagination items will be dynamically generated -->
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                 </div>
                 {% else %}
@@ -370,6 +399,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let currentHistory = [];
+        let currentPage = 1;
+        let totalPages = 1;
+        let historyLimit = 10;
 
         // Load conversion history on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -456,9 +488,9 @@
 
                     showAlert('Document successfully digitized using Gemini!', 'success');
                     
-                    // Refresh history after successful conversion
+                    // Refresh history after successful conversion - stay on current page or go to page 1 if new conversion
                     setTimeout(() => {
-                        loadConversionHistory();
+                        loadConversionHistory(1); // Always go to page 1 to show the latest conversion
                     }, 1000);
                 } else {
                     showAlert(result.message || 'Conversion failed', 'danger');
@@ -473,17 +505,32 @@
             }
         });
 
-        // Load conversion history
-        async function loadConversionHistory() {
+        // Load conversion history with pagination
+        async function loadConversionHistory(page = 1) {
             const historyContainer = document.getElementById('historyContainer');
             
             try {
-                const response = await fetch('/history');
+                const response = await fetch(`/history?page=${page}&limit=${historyLimit}`);
                 const data = await response.json();
 
-                if (data.success && data.history.length > 0) {
+                if (data.success) {
                     currentHistory = data.history;
-                    renderHistoryItems(data.history);
+                    currentPage = data.page;
+                    totalPages = data.total_pages;
+                    
+                    if (data.history.length > 0) {
+                        renderHistoryItems(data.history);
+                        renderPagination(data);
+                    } else {
+                        historyContainer.innerHTML = `
+                            <div class="text-center py-4">
+                                <i class="bi bi-clock-history" style="font-size: 2rem; color: #ccc;"></i>
+                                <p class="mt-2 text-muted">No conversion history found</p>
+                                <small class="text-muted">Your digitized documents will appear here</small>
+                            </div>
+                        `;
+                        hidePagination();
+                    }
                 } else {
                     historyContainer.innerHTML = `
                         <div class="text-center py-4">
@@ -492,6 +539,7 @@
                             <small class="text-muted">Your digitized documents will appear here</small>
                         </div>
                     `;
+                    hidePagination();
                 }
             } catch (error) {
                 console.error('Error loading history:', error);
@@ -499,11 +547,12 @@
                     <div class="text-center py-4">
                         <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
                         <p class="mt-2 text-muted">Failed to load conversion history</p>
-                        <button class="btn btn-sm btn-outline-primary" onclick="loadConversionHistory()">
+                        <button class="btn btn-sm btn-outline-primary" onclick="loadConversionHistory(${currentPage})">
                             <i class="bi bi-arrow-clockwise me-1"></i>Try Again
                         </button>
                     </div>
                 `;
+                hidePagination();
             }
         }
 
@@ -541,6 +590,110 @@
             }).join('');
 
             historyContainer.innerHTML = `<div class="list-group mb-3">${historyHTML}</div>`;
+        }
+
+        // Render pagination controls
+        function renderPagination(data) {
+            const paginationContainer = document.getElementById('paginationContainer');
+            const pagination = document.getElementById('historyPagination');
+            
+            if (data.total_pages <= 1) {
+                hidePagination();
+                return;
+            }
+            
+            let paginationHTML = '';
+            
+            // Previous button
+            if (data.has_prev) {
+                paginationHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadConversionHistory(${data.page - 1})" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                `;
+            } else {
+                paginationHTML += `
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </span>
+                    </li>
+                `;
+            }
+            
+            // Page numbers
+            const startPage = Math.max(1, data.page - 2);
+            const endPage = Math.min(data.total_pages, data.page + 2);
+            
+            // First page if not in range
+            if (startPage > 1) {
+                paginationHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadConversionHistory(1)">1</a>
+                    </li>
+                `;
+                if (startPage > 2) {
+                    paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+            
+            // Current range of pages
+            for (let i = startPage; i <= endPage; i++) {
+                if (i === data.page) {
+                    paginationHTML += `
+                        <li class="page-item active">
+                            <span class="page-link">${i}</span>
+                        </li>
+                    `;
+                } else {
+                    paginationHTML += `
+                        <li class="page-item">
+                            <a class="page-link" href="#" onclick="loadConversionHistory(${i})">${i}</a>
+                        </li>
+                    `;
+                }
+            }
+            
+            // Last page if not in range
+            if (endPage < data.total_pages) {
+                if (endPage < data.total_pages - 1) {
+                    paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+                paginationHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadConversionHistory(${data.total_pages})">${data.total_pages}</a>
+                    </li>
+                `;
+            }
+            
+            // Next button
+            if (data.has_next) {
+                paginationHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadConversionHistory(${data.page + 1})" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                `;
+            } else {
+                paginationHTML += `
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </span>
+                    </li>
+                `;
+            }
+            
+            pagination.innerHTML = paginationHTML;
+            paginationContainer.classList.remove('d-none');
+        }
+        
+        // Hide pagination
+        function hidePagination() {
+            document.getElementById('paginationContainer').classList.add('d-none');
         }
 
         // Show history details in modal
@@ -586,7 +739,7 @@
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Loading...';
             btn.disabled = true;
 
-            loadConversionHistory().finally(() => {
+            loadConversionHistory(currentPage).finally(() => {
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
             });

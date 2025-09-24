@@ -88,18 +88,27 @@ async def convert(
 @router.get("/history")
 @catch_error
 @login_required("end_user")
-async def get_conversion_history(request: Request, limit: int = 10, skip: int = 0):
-    """Get user's conversion history"""
+async def get_conversion_history(request: Request, page: int = 1, limit: int = 10):
+    """Get user's conversion history with pagination"""
     try:
         user = request.state.user
-        history = await services.converter_service.get_user_conversion_history(
+        skip = (page - 1) * limit
+        
+        history, total_count = await services.converter_service.get_user_conversion_history(
             user.id, limit, skip
         )
+        
+        total_pages = (total_count + limit - 1) // limit  # Ceiling division
         
         return {
             "success": True,
             "history": history,
-            "total": len(history)
+            "total": total_count,
+            "page": page,
+            "limit": limit,
+            "total_pages": total_pages,
+            "has_next": page < total_pages,
+            "has_prev": page > 1
         }
         
     except Exception as e:
@@ -107,7 +116,13 @@ async def get_conversion_history(request: Request, limit: int = 10, skip: int = 
         return {
             "success": False,
             "message": str(e),
-            "history": []
+            "history": [],
+            "total": 0,
+            "page": page,
+            "limit": limit,
+            "total_pages": 0,
+            "has_next": False,
+            "has_prev": False
         }
 
 

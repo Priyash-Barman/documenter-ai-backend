@@ -105,24 +105,27 @@ class ConverterService:
         except Exception as e:
             logger.error(f"Error saving conversion history: {str(e)}")
 
-    async def get_user_conversion_history(self, user_id: str, limit: int = 10, skip: int = 0) -> List[Dict]:
-        """Get user's conversion history"""
+    async def get_user_conversion_history(self, user_id: str, limit: int = 10, skip: int = 0) -> Tuple[List[Dict], int]:
+        """Get user's conversion history with total count"""
         try:
+            # Get total count for pagination
+            total_count = await self.history_collection.count_documents({"user_id": user_id})
+            
             cursor = self.history_collection.find(
                 {"user_id": user_id}
             ).sort("created_at", -1).limit(limit).skip(skip)
             
             history = []
             async for doc in cursor:
-
+                # Convert ObjectId to string for JSON serialization
                 doc["_id"] = str(doc["_id"])
                 history.append(doc)
             
-            return history
+            return history, total_count
             
         except Exception as e:
             logger.error(f"Error getting conversion history: {str(e)}")
-            return []
+            return [], 0
 
     async def get_conversion_details(self, conversion_id: str, user_id: str) -> Optional[Dict]:
         """Get detailed information about a specific conversion"""
