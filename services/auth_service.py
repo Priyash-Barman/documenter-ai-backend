@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional, Tuple
 from cachetools import TTLCache
-from jose import JWTError
+import jwt
+from jwt.exceptions import InvalidTokenError
 
 from config import SECRET_KEY, ALGORITHM
 from schemas.user_schema import UserInDB
@@ -9,7 +10,6 @@ from utils.jwt_utils import create_access_token
 from utils.email_utils import EmailSender
 from utils.common_utils import generate_otp
 from utils.logger import logger
-import jwt
 from fastapi import status, HTTPException
 
 # Configure caches
@@ -169,7 +169,7 @@ class AuthService:
 
             return payload
 
-        except JWTError as e:
+        except InvalidTokenError as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",

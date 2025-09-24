@@ -144,6 +144,24 @@
         .pagination .page-link {
             color: var(--primary-color);
         }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            border-color: #ffecb5;
+            color: #664d03;
+        }
+
+        .alert-success {
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+            color: #0f5132;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+            color: #842029;
+        }
     </style>
 </head>
 <body>
@@ -160,11 +178,16 @@
                 <div class="model-selector me-3">
                     <div class="dropdown">
                         <button class="btn dropdown-toggle" type="button" id="modelDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-selected-model="gemini">
-                            <i class="bi bi-robot me-2"></i>Available Models
+                            <i class="bi bi-robot me-2"></i>Gemini AI
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="modelDropdown">
-                            <li><h6 class="dropdown-header">Ai Models</h6></li>
-                            <li><a class="dropdown-item" href="#" data-value="gemini">Gemini</a></li>
+                            <li><h6 class="dropdown-header">AI Models</h6></li>
+                            <li><a class="dropdown-item active" href="#" data-value="gemini">
+                                <i class="bi bi-google me-2"></i>Gemini AI
+                                <small class="text-muted d-block">Google's advanced AI model</small>
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><small class="px-3 text-muted">More models coming soon...</small></li>
                         </ul>
                     </div>
                 </div>
@@ -209,13 +232,20 @@
                 <div class="card mb-4">
                     <div class="card-body p-4">
                         <h5 class="card-title mb-4"><i class="bi bi-cloud-arrow-up-fill me-2"></i>Upload Document</h5>
+                        
+                        <!-- Alert for model selection -->
+                        <div class="alert alert-info mb-4">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Note:</strong> Currently, only Gemini AI is available for document digitization. Make sure Gemini is selected from the dropdown above.
+                        </div>
+
                         <div class="upload-area" id="uploadArea">
                             <div class="mb-3">
                                 <i class="bi bi-file-earmark-arrow-up" style="font-size: 2.5rem; color: var(--primary-color);"></i>
                             </div>
                             <h5 class="mb-2">Drag & drop your document here</h5>
-                            <p class="text-muted mb-3">or click to browse files</p>
-                            <input type="file" id="documentUpload" accept="image/*,.pdf" class="d-none">
+                            <p class="text-muted mb-3">or click to browse files (supports images: JPG, PNG, GIF, BMP)</p>
+                            <input type="file" id="documentUpload" accept="image/*" class="d-none">
                             <button class="btn btn-primary px-4" onclick="document.getElementById('documentUpload').click()">
                                 <i class="bi bi-folder2-open me-2"></i>Select File
                             </button>
@@ -228,7 +258,7 @@
                                     <h6 class="mb-3">Original Document</h6>
                                     <img src="" alt="Document Preview" class="img-fluid file-preview" id="originalPreview">
                                     <div class="text-center mt-2">
-                                        <button class="btn btn-sm btn-outline-secondary" id="downloadOriginalBtn" disabled>
+                                        <button class="btn btn-sm btn-outline-secondary" id="downloadOriginalBtn">
                                             <i class="bi bi-download me-1"></i>Download Original
                                         </button>
                                     </div>
@@ -265,60 +295,19 @@
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="card-title mb-0"><i class="bi bi-clock-history me-2"></i>Recent Conversions</h5>
-                            <button class="btn btn-sm btn-outline-secondary">
+                            <button class="btn btn-sm btn-outline-secondary" id="refreshHistoryBtn">
                                 <i class="bi bi-arrow-clockwise me-1"></i>Refresh
                             </button>
                         </div>
 
-                        <div class="list-group mb-3">
-                            <!-- Sample history items - these would be dynamically generated in a real app -->
-                            <div class="list-group-item border-0 rounded mb-2 p-3 history-item">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h6 class="mb-1">receipt_june.jpg</h6>
-                                        <small class="text-muted">Converted yesterday | Google Vision</small>
-                                    </div>
-                                    <div>
-                                        <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
-                                        <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#historyModal"
-                                                onclick="showHistoryItem('receipt_june.jpg', 'yesterday', 'Google Vision', 'receipt.jpg', 'receipt_digitized.jpg')">
-                                            View
-                                        </button>
-                                    </div>
+                        <div id="historyContainer">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
                                 </div>
-                            </div>
-
-                            <div class="list-group-item border-0 rounded mb-2 p-3 history-item">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h6 class="mb-1">contract_agreement.png</h6>
-                                        <small class="text-muted">Converted 3 days ago | AWS Textract</small>
-                                    </div>
-                                    <div>
-                                        <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
-                                        <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#historyModal"
-                                                onclick="showHistoryItem('contract_agreement.png', '3 days ago', 'AWS Textract', 'contract.png', 'contract_digitized.png')">
-                                            View
-                                        </button>
-                                    </div>
-                                </div>
+                                <p class="mt-2 text-muted">Loading conversion history...</p>
                             </div>
                         </div>
-
-                        <!-- Pagination -->
-                        <nav aria-label="History pagination">
-                            <ul class="pagination justify-content-center">
-                                <li class="page-item disabled">
-                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-                                </li>
-                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">Next</a>
-                                </li>
-                            </ul>
-                        </nav>
                     </div>
                 </div>
                 {% else %}
@@ -349,36 +338,25 @@
                 </div>
                 <div class="modal-body">
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             <p class="mb-1"><strong>Filename:</strong> <span id="modalFilename">-</span></p>
                             <p class="mb-1"><strong>Date:</strong> <span id="modalDate">-</span></p>
                             <p class="mb-1"><strong>Model:</strong> <span id="modalModel">-</span></p>
-                            <p class="mb-1"><strong>Status:</strong> <span class="badge bg-success bg-opacity-10 text-success">Completed</span></p>
+                            <p class="mb-1"><strong>Processing Time:</strong> <span id="modalProcessingTime">-</span></p>
+                            <p class="mb-1"><strong>Status:</strong> <span id="modalStatus">-</span></p>
                         </div>
-                        <div class="col-md-6 text-end">
-                            <button class="btn btn-primary" id="downloadAllBtn">
-                                <i class="bi bi-download me-2"></i>Download All
+                        <div class="col-md-4 text-end">
+                            <button class="btn btn-primary" id="downloadDetailsBtn">
+                                <i class="bi bi-download me-2"></i>Download
                             </button>
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
-                            <h6 class="mb-3">Original Document</h6>
-                            <img src="" alt="Original Document" class="modal-document-image" id="modalOriginalImage">
-                            <div class="text-center mt-2">
-                                <button class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-download me-1"></i>Download Original
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="mb-3">Digitized Result</h6>
-                            <img src="" alt="Digitized Result" class="modal-document-image" id="modalResultImage">
-                            <div class="text-center mt-2">
-                                <button class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-download me-1"></i>Download Result
-                                </button>
+                        <div class="col-12">
+                            <h6 class="mb-3">Extracted Text</h6>
+                            <div class="bg-light p-3 rounded" id="modalExtractedText" style="max-height: 300px; overflow-y: auto;">
+                                <p class="text-muted mb-0">No extracted text available</p>
                             </div>
                         </div>
                     </div>
@@ -392,6 +370,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        let currentHistory = [];
+
+        // Load conversion history on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadConversionHistory();
+        });
+
         // Basic file upload preview functionality
         document.getElementById('documentUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -410,9 +395,15 @@
             document.getElementById('documentUpload').value = '';
             document.getElementById('uploadArea').classList.remove('d-none');
             document.getElementById('previewSection').classList.add('d-none');
+            
+            // Reset result area
+            document.getElementById('textOutput').classList.remove('d-none');
+            document.getElementById('resultPreview').classList.add('d-none');
+            document.getElementById('downloadResultBtn').classList.add('d-none');
+            document.getElementById('textOutput').innerHTML = '<p class="text-muted mb-0">Digitized content will appear here...</p>';
         });
 
-        // Simulate conversion process
+        // Convert button functionality
         document.getElementById('convertBtn').addEventListener('click', async function() {
             const convertBtn = document.getElementById('convertBtn');
             const originalText = convertBtn.innerHTML;
@@ -421,12 +412,17 @@
             const selectedModel = document.getElementById('modelDropdown').dataset.selectedModel || 'gemini';
 
             if (!file) {
-                alert('Please select a file first');
+                showAlert('Please select a file first', 'warning');
+                return;
+            }
+
+            if (selectedModel.toLowerCase() !== 'gemini') {
+                showAlert('Please select Gemini AI from the model dropdown', 'warning');
                 return;
             }
 
             convertBtn.disabled = true;
-            convertBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
+            convertBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing with Gemini AI...';
 
             try {
                 // Create FormData and append the file
@@ -437,10 +433,6 @@
                 // Make API call
                 const response = await fetch('/convert', {
                     method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-                    },
                     body: formData
                 });
 
@@ -450,28 +442,158 @@
 
                 const result = await response.json();
 
-                // Display the result
-                document.getElementById('textOutput').classList.add('d-none');
-                document.getElementById('resultPreview').classList.remove('d-none');
-                document.getElementById('resultPreview').src = `data:image/png;base64,${result.digitized_image}`;
+                if (result.success) {
+                    // Display the result
+                    document.getElementById('textOutput').classList.add('d-none');
+                    document.getElementById('resultPreview').classList.remove('d-none');
+                    document.getElementById('resultPreview').src = `data:image/png;base64,${result.digitized_image}`;
 
-                // Show the download button for result
-                document.getElementById('downloadResultBtn').classList.remove('d-none');
+                    // Show the download button for result
+                    document.getElementById('downloadResultBtn').classList.remove('d-none');
 
-                // Store the result data for download
-                document.getElementById('downloadResultBtn').dataset.filename = result.filename;
-                document.getElementById('downloadResultBtn').dataset.imageData = result.digitized_image;
+                    // Store the result data for download
+                    document.getElementById('downloadResultBtn').dataset.filename = result.filename;
+                    document.getElementById('downloadResultBtn').dataset.imageData = result.digitized_image;
+
+                    showAlert('Document successfully digitized using Gemini AI!', 'success');
+                    
+                    // Refresh history after successful conversion
+                    setTimeout(() => {
+                        loadConversionHistory();
+                    }, 1000);
+                } else {
+                    showAlert(result.message || 'Conversion failed', 'danger');
+                }
 
             } catch (error) {
                 console.error('Conversion error:', error);
-                alert('Conversion failed. Please try again.');
+                showAlert('Conversion failed. Please try again.', 'danger');
             } finally {
                 convertBtn.disabled = false;
                 convertBtn.innerHTML = originalText;
             }
         });
 
-        // Add proper download functionality
+        // Load conversion history
+        async function loadConversionHistory() {
+            const historyContainer = document.getElementById('historyContainer');
+            
+            try {
+                const response = await fetch('/history');
+                const data = await response.json();
+
+                if (data.success && data.history.length > 0) {
+                    currentHistory = data.history;
+                    renderHistoryItems(data.history);
+                } else {
+                    historyContainer.innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="bi bi-clock-history" style="font-size: 2rem; color: #ccc;"></i>
+                            <p class="mt-2 text-muted">No conversion history found</p>
+                            <small class="text-muted">Your digitized documents will appear here</small>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+                historyContainer.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                        <p class="mt-2 text-muted">Failed to load conversion history</p>
+                        <button class="btn btn-sm btn-outline-primary" onclick="loadConversionHistory()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Render history items
+        function renderHistoryItems(history) {
+            const historyContainer = document.getElementById('historyContainer');
+            
+            const historyHTML = history.map(item => {
+                const statusBadge = item.success ? 
+                    '<span class="badge bg-success bg-opacity-10 text-success">Completed</span>' :
+                    '<span class="badge bg-danger bg-opacity-10 text-danger">Failed</span>';
+                
+                const createdDate = new Date(item.created_at).toLocaleDateString();
+                const processingTime = parseFloat(item.processing_time).toFixed(2);
+
+                return `
+                    <div class="list-group-item border-0 rounded mb-2 p-3 history-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="mb-1">${item.filename}</h6>
+                                <small class="text-muted">
+                                    Converted on ${createdDate} | ${item.model_used} | ${processingTime}s
+                                </small>
+                            </div>
+                            <div>
+                                ${statusBadge}
+                                <button class="btn btn-sm btn-outline-primary ms-2" 
+                                        onclick="showHistoryDetails('${item.id || item._id}')">
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            historyContainer.innerHTML = `<div class="list-group mb-3">${historyHTML}</div>`;
+        }
+
+        // Show history details in modal
+        async function showHistoryDetails(conversionId) {
+            try {
+                const response = await fetch(`/history/${conversionId}`);
+                const data = await response.json();
+
+                if (data.success && data.details) {
+                    const details = data.details;
+                    
+                    document.getElementById('modalFilename').textContent = details.filename;
+                    document.getElementById('modalDate').textContent = new Date(details.created_at).toLocaleString();
+                    document.getElementById('modalModel').textContent = details.model_used;
+                    document.getElementById('modalProcessingTime').textContent = `${parseFloat(details.processing_time).toFixed(2)} seconds`;
+                    
+                    const statusHtml = details.success ? 
+                        '<span class="badge bg-success bg-opacity-10 text-success">Completed</span>' :
+                        '<span class="badge bg-danger bg-opacity-10 text-danger">Failed</span>';
+                    document.getElementById('modalStatus').innerHTML = statusHtml;
+                    
+                    document.getElementById('modalExtractedText').innerHTML = 
+                        details.extracted_text ? 
+                        `<pre style="white-space: pre-wrap; font-family: inherit;">${details.extracted_text}</pre>` :
+                        '<p class="text-muted mb-0">No extracted text available</p>';
+
+                    // Show modal
+                    const modal = new bootstrap.Modal(document.getElementById('historyModal'));
+                    modal.show();
+                } else {
+                    showAlert('Failed to load conversion details', 'danger');
+                }
+            } catch (error) {
+                console.error('Error loading details:', error);
+                showAlert('Failed to load conversion details', 'danger');
+            }
+        }
+
+        // Refresh history button
+        document.getElementById('refreshHistoryBtn').addEventListener('click', function() {
+            const btn = this;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Loading...';
+            btn.disabled = true;
+
+            loadConversionHistory().finally(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            });
+        });
+
+        // Download functionality
         document.getElementById('downloadOriginalBtn').addEventListener('click', function() {
             const file = document.getElementById('documentUpload').files[0];
             if (file) {
@@ -494,7 +616,7 @@
             if (imageData) {
                 const link = document.createElement('a');
                 link.href = `data:image/png;base64,${imageData}`;
-                link.download = filename;
+                link.download = filename.replace(/\.[^/.]+$/, "") + "_digitized.png";
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -543,40 +665,47 @@
             document.getElementById('documentUpload').dispatchEvent(event);
         }
 
-        // Model dropdown selection
+        // Model dropdown selection (though only Gemini is available)
         document.querySelectorAll('.model-selector .dropdown-item').forEach(item => {
             item.addEventListener('click', function(e) {
                 e.preventDefault();
-                const modelName = this.textContent;
+                const modelName = this.textContent.trim();
                 const modelValue = this.dataset.value;
                 const dropdownButton = document.getElementById('modelDropdown');
+                
+                // Remove active class from all and add to clicked
+                document.querySelectorAll('.model-selector .dropdown-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
                 dropdownButton.innerHTML = `<i class="bi bi-robot me-2"></i>${modelName}`;
                 dropdownButton.dataset.selectedModel = modelValue;
             });
         });
 
-        // History modal functionality
-        function showHistoryItem(filename, date, model, originalImg, resultImg) {
-            document.getElementById('modalFilename').textContent = filename;
-            document.getElementById('modalDate').textContent = date;
-            document.getElementById('modalModel').textContent = model;
+        // Utility function to show alerts
+        function showAlert(message, type = 'info') {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert-temporary');
+            existingAlerts.forEach(alert => alert.remove());
 
-            // Set images (in a real app, these would be the actual image URLs)
-            document.getElementById('modalOriginalImage').src = `https://via.placeholder.com/600x800/ffffff/333333?text=${encodeURIComponent(originalImg)}`;
-            document.getElementById('modalResultImage').src = `https://via.placeholder.com/600x800/4361ee/ffffff?text=${encodeURIComponent(resultImg)}`;
+            // Create new alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-temporary`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
 
-            // Set download buttons (in a real app, these would link to actual files)
-            document.querySelector('#historyModal .modal-body .btn-outline-primary').onclick = function() {
-                alert(`Downloading original file: ${originalImg}`);
-            };
+            // Insert at the top of main content
+            const mainContent = document.querySelector('.col-lg-8');
+            mainContent.insertBefore(alertDiv, mainContent.firstChild);
 
-            document.querySelectorAll('#historyModal .modal-body .btn-outline-primary')[1].onclick = function() {
-                alert(`Downloading result file: ${resultImg}`);
-            };
-
-            document.getElementById('downloadAllBtn').onclick = function() {
-                alert(`Downloading ZIP file containing ${originalImg} and ${resultImg}`);
-            };
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv && alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
         }
     </script>
 </body>
