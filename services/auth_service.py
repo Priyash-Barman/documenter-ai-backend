@@ -12,9 +12,8 @@ from utils.common_utils import generate_otp
 from utils.logger import logger
 from fastapi import status, HTTPException
 
-# Configure caches
-otp_cache = TTLCache(maxsize=1000, ttl=600)  # 10 minutes for OTP
-resend_cache = TTLCache(maxsize=1000, ttl=30)  # 30 sec cooldown
+otp_cache = TTLCache(maxsize=1000, ttl=600)
+resend_cache = TTLCache(maxsize=1000, ttl=30) 
 
 
 class AuthService:
@@ -33,7 +32,7 @@ class AuthService:
     async def send_login_otp(self, email: str) -> bool:
         """Send OTP to user's email for authentication"""
         try:
-            # Check resend cooldown
+ 
             can_resend, _ = await self.can_resend_otp(email)
             if not can_resend:
                 logger.warning(f"Resend attempt too soon for {email}")
@@ -48,7 +47,6 @@ class AuthService:
                 "attempts": 0
             }
 
-            # Set resend cooldown
             resend_cache[email] = datetime.utcnow() + timedelta(minutes=3)
 
             subject = "Your Login Verification Code"
@@ -84,7 +82,6 @@ class AuthService:
                 logger.warning(f"Invalid OTP attempt for {email}")
                 return False, None
 
-            # OTP verified, check if user exists
             user = await self.users_collection.find_one({"email": email})
 
             if user:
@@ -152,14 +149,13 @@ class AuthService:
             HTTPException: If token is invalid or expired
         """
         try:
-            # Decode the token using your secret key and algorithm
+
             payload = jwt.decode(
                 token,
-                SECRET_KEY,  # Your secret key from settings
-                algorithms=[ALGORITHM]  # Typically "HS256"
+                SECRET_KEY, 
+                algorithms=[ALGORITHM]  
             )
 
-            # Check if token is expired
             expire = payload.get("exp")
             if expire is None or datetime.utcnow() > datetime.fromtimestamp(expire):
                 raise HTTPException(

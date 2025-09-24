@@ -178,12 +178,12 @@
                 <div class="model-selector me-3">
                     <div class="dropdown">
                         <button class="btn dropdown-toggle" type="button" id="modelDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-selected-model="gemini">
-                            <i class="bi bi-robot me-2"></i>Gemini AI
+                            <i class="bi bi-robot me-2"></i>Available Models
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="modelDropdown">
                             <li><h6 class="dropdown-header">AI Models</h6></li>
                             <li><a class="dropdown-item active" href="#" data-value="gemini">
-                                <i class="bi bi-google me-2"></i>Gemini AI
+                                <i class="bi bi-google me-2"></i>Gemini
                                 <small class="text-muted d-block">Google's advanced AI model</small>
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -236,7 +236,7 @@
                         <!-- Alert for model selection -->
                         <div class="alert alert-info mb-4">
                             <i class="bi bi-info-circle me-2"></i>
-                            <strong>Note:</strong> Currently, only Gemini AI is available for document digitization. Make sure Gemini is selected from the dropdown above.
+                            <strong>Note:</strong> Currently, only Gemini is available for document digitization. Make sure Gemini is selected from the dropdown above.
                         </div>
 
                         <div class="upload-area" id="uploadArea">
@@ -417,12 +417,12 @@
             }
 
             if (selectedModel.toLowerCase() !== 'gemini') {
-                showAlert('Please select Gemini AI from the model dropdown', 'warning');
+                showAlert('Please select Gemini from the model dropdown', 'warning');
                 return;
             }
 
             convertBtn.disabled = true;
-            convertBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing with Gemini AI...';
+            convertBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing with Gemini...';
 
             try {
                 // Create FormData and append the file
@@ -455,7 +455,7 @@
                     document.getElementById('downloadResultBtn').dataset.filename = result.filename;
                     document.getElementById('downloadResultBtn').dataset.imageData = result.digitized_image;
 
-                    showAlert('Document successfully digitized using Gemini AI!', 'success');
+                    showAlert('Document successfully digitized using Gemini!', 'success');
                     
                     // Refresh history after successful conversion
                     setTimeout(() => {

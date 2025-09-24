@@ -5,13 +5,12 @@ from datetime import datetime
 
 class ConversionRequest(BaseModel):
     model: str
-    # Image will be handled separately as UploadFile
 
 class ConversionResponse(BaseModel):
     success: bool
     message: str
     filename: str
-    digitized_image: str  # base64 encoded image
+    digitized_image: str
     processing_time: float
     model_used: str
 

@@ -45,7 +45,7 @@ async def convert(
     user = request.state.user
 
     try:
-        # Validate model selection
+
         if model.lower() != "gemini":
             return {
                 "success": False,
@@ -56,20 +56,17 @@ async def convert(
                 "model_used": model
             }
 
-        # Read image data
         image_data = await image.read()
         
-        # Process with converter service
         processed_image = await services.converter_service.convert_image(
             image_data, model, user_id=user.id, filename=image.filename
         )
         
-        # Convert to base64 for response
         image_base64 = base64.b64encode(processed_image).decode('utf-8')
 
         return {
             "success": True,
-            "message": "Conversion successful! Document has been digitized using Gemini AI.",
+            "message": "Conversion successful! Document has been digitized using Gemini.",
             "filename": image.filename,
             "digitized_image": image_base64,
             "processing_time": time.time() - start_time,

@@ -10,13 +10,13 @@ import config
 
 class GeminiAIService:
     def __init__(self):
-        """Initialize Gemini AI service with API key"""
+        """Initialize Gemini service with API key"""
         try:
             genai.configure(api_key=config.GEMINI_API_KEY)
             self.model = genai.GenerativeModel('gemini-1.5-flash')
-            logger.info("Gemini AI service initialized successfully")
+            logger.info("Gemini service initialized successfully")
         except Exception as e:
-            logger.error(f"Error initializing Gemini AI service: {str(e)}")
+            logger.error(f"Error initializing Gemini service: {str(e)}")
             raise
         
     async def digitize_handwritten_text(self, image_data: bytes) -> Dict[str, Any]:
@@ -43,15 +43,12 @@ class GeminiAIService:
             If the image doesn't contain readable text, please describe what you see in the image instead.
             """
             
-            # Generate response using Gemini
             response = self.model.generate_content([prompt, image])
             extracted_text = response.text
             logger.info(f"Successfully extracted text: {len(extracted_text)} characters")
             
-            # Create a digitized version of the document
             digitized_image = self._create_digitized_document(extracted_text, image.size)
             
-            # Convert to bytes
             img_byte_arr = io.BytesIO()
             digitized_image.save(img_byte_arr, format='PNG')
             digitized_bytes = img_byte_arr.getvalue()
@@ -69,7 +66,7 @@ class GeminiAIService:
                 'success': False,
                 'error': str(e),
                 'extracted_text': '',
-                'digitized_image': image_data  # Return original on error
+                'digitized_image': image_data 
             }
     
     def _create_digitized_document(self, text: str, original_size: tuple) -> Image.Image:
@@ -77,11 +74,9 @@ class GeminiAIService:
         Create a clean, digitized version of the document
         """
         try:
-            # Create a white background image with appropriate size
             width = max(800, original_size[0])
             height = max(1000, original_size[1])
             
-            # Ensure minimum size for readability
             if width < 800:
                 width = 800
             if height < 1000:
@@ -90,9 +85,7 @@ class GeminiAIService:
             image = Image.new('RGB', (width, height), 'white')
             draw = ImageDraw.Draw(image)
             
-            # Try to load fonts, fallback to default if not available
             try:
-                # Try different font paths for different operating systems
                 font_paths = [
                     "arial.ttf",  # Windows
                     "/System/Library/Fonts/Arial.ttf",  # macOS
@@ -120,7 +113,6 @@ class GeminiAIService:
                 font = ImageFont.load_default()
                 title_font = ImageFont.load_default()
             
-            # Add header
             header_text = "DIGITIZED DOCUMENT"
             header_bbox = draw.textbbox((0, 0), header_text, font=title_font)
             header_width = header_bbox[2] - header_bbox[0]
@@ -128,34 +120,28 @@ class GeminiAIService:
             
             draw.text((header_x, 30), header_text, fill='#2c3e50', font=title_font)
             
-            # Add a line separator
             draw.line([(50, 70), (width-50, 70)], fill='#bdc3c7', width=2)
             
-            # Add processing info
-            info_text = "Processed with Google Gemini AI"
+            info_text = "Processed with Google Gemini"
             draw.text((50, 80), info_text, fill='#7f8c8d', font=font)
             
-            # Add the extracted text
             y_position = 120
             line_height = 30
             margin_left = 50
             margin_right = 50
             max_width = width - margin_left - margin_right
             
-            # Split text into lines that fit within the image width
             lines = self._split_text_to_lines(text, font, max_width, draw)
             
-            # Draw each line
             for line in lines:
-                if y_position + line_height > height - 80:  # Near bottom of page
-                    # Add "continued..." message
+                if y_position + line_height > height - 80:  
+
                     draw.text((margin_left, y_position), "... (text continues)", fill='#7f8c8d', font=font)
                     break
                 
                 draw.text((margin_left, y_position), line, fill='#2c3e50', font=font)
                 y_position += line_height
             
-            # Add footer
             footer_y = height - 50
             footer_text = f"Generated on: {self._get_current_datetime()} | Lines: {len(lines)}"
             draw.text((50, footer_y), footer_text, fill='#95a5a6', font=font)
@@ -165,7 +151,7 @@ class GeminiAIService:
             
         except Exception as e:
             logger.error(f"Error creating digitized document: {str(e)}")
-            # Return a simple error image
+
             error_image = Image.new('RGB', (800, 600), 'white')
             error_draw = ImageDraw.Draw(error_image)
             error_draw.text((50, 50), f"Error creating digitized version: {str(e)}", fill='red')
@@ -178,7 +164,7 @@ class GeminiAIService:
         
         for paragraph in paragraphs:
             if not paragraph.strip():
-                lines.append("")  # Empty line for paragraph break
+                lines.append("") 
                 continue
                 
             words = paragraph.split()
@@ -187,7 +173,6 @@ class GeminiAIService:
             for word in words:
                 test_line = current_line + " " + word if current_line else word
                 
-                # Check if line fits within max width
                 try:
                     bbox = draw.textbbox((0, 0), test_line, font=font)
                     line_width = bbox[2] - bbox[0]
@@ -199,7 +184,6 @@ class GeminiAIService:
                             lines.append(current_line)
                         current_line = word
                 except:
-                    # Fallback to character count if textbbox fails
                     if len(test_line) <= 80:
                         current_line = test_line
                     else:

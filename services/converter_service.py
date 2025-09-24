@@ -19,18 +19,17 @@ class ConverterService:
         start_time = datetime.utcnow()
         
         try:
-            # Log conversion start
+
             await self._log_conversion_start(conversion_id, model, user_id, filename)
             
             if model.lower() == "gemini":
-                # Use Gemini AI for digitization
+
                 result = await self.gemini_service.digitize_handwritten_text(image_data)
                 
                 if result['success']:
                     processed_image_data = result['digitized_image']
                     extracted_text = result.get('extracted_text', '')
                     
-                    # Save conversion history
                     await self._save_conversion_history(
                         conversion_id, user_id, filename, model, 
                         extracted_text, True, start_time
@@ -39,7 +38,7 @@ class ConverterService:
                     logger.info(f"Gemini conversion successful for {filename}")
                     return processed_image_data
                 else:
-                    # Log error but return original image
+
                     await self._save_conversion_history(
                         conversion_id, user_id, filename, model, 
                         f"Error: {result.get('error', 'Unknown error')}", False, start_time
@@ -47,7 +46,7 @@ class ConverterService:
                     logger.error(f"Gemini conversion failed: {result.get('error')}")
                     return image_data
             else:
-                # For other models (not implemented yet), return original
+
                 await self._save_conversion_history(
                     conversion_id, user_id, filename, model, 
                     "Model not implemented", False, start_time
@@ -115,7 +114,7 @@ class ConverterService:
             
             history = []
             async for doc in cursor:
-                # Convert ObjectId to string for JSON serialization
+
                 doc["_id"] = str(doc["_id"])
                 history.append(doc)
             
