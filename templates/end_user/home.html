@@ -159,19 +159,12 @@
                 {% if user %}
                 <div class="model-selector me-3">
                     <div class="dropdown">
-                        <button class="btn dropdown-toggle" type="button" id="modelDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn dropdown-toggle" type="button" id="modelDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-selected-model="gemini">
                             <i class="bi bi-robot me-2"></i>Available Models
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="modelDropdown">
-                            <li><h6 class="dropdown-header">OCR Models</h6></li>
-                            <li><a class="dropdown-item" href="#">Tesseract OCR</a></li>
-                            <li><a class="dropdown-item" href="#">Google Vision</a></li>
-                            <li><a class="dropdown-item" href="#">AWS Textract</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">Document Types</h6></li>
-                            <li><a class="dropdown-item" href="#">Invoices</a></li>
-                            <li><a class="dropdown-item" href="#">Receipts</a></li>
-                            <li><a class="dropdown-item" href="#">Contracts</a></li>
+                            <li><h6 class="dropdown-header">Ai Models</h6></li>
+                            <li><a class="dropdown-item" href="#" data-value="gemini">Gemini</a></li>
                         </ul>
                     </div>
                 </div>
@@ -282,22 +275,6 @@
                             <div class="list-group-item border-0 rounded mb-2 p-3 history-item">
                                 <div class="d-flex justify-content-between">
                                     <div>
-                                        <h6 class="mb-1">invoice_2023.pdf</h6>
-                                        <small class="text-muted">Converted 2 hours ago | Tesseract OCR</small>
-                                    </div>
-                                    <div>
-                                        <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
-                                        <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#historyModal"
-                                                onclick="showHistoryItem('invoice_2023.pdf', '2 hours ago', 'Tesseract OCR', 'invoice.jpg', 'invoice_digitized.jpg')">
-                                            View
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="list-group-item border-0 rounded mb-2 p-3 history-item">
-                                <div class="d-flex justify-content-between">
-                                    <div>
                                         <h6 class="mb-1">receipt_june.jpg</h6>
                                         <small class="text-muted">Converted yesterday | Google Vision</small>
                                     </div>
@@ -321,22 +298,6 @@
                                         <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
                                         <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#historyModal"
                                                 onclick="showHistoryItem('contract_agreement.png', '3 days ago', 'AWS Textract', 'contract.png', 'contract_digitized.png')">
-                                            View
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="list-group-item border-0 rounded p-3 history-item">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h6 class="mb-1">scan_document.pdf</h6>
-                                        <small class="text-muted">Converted 1 week ago | Tesseract OCR</small>
-                                    </div>
-                                    <div>
-                                        <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
-                                        <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#historyModal"
-                                                onclick="showHistoryItem('scan_document.pdf', '1 week ago', 'Tesseract OCR', 'scan.jpg', 'scan_digitized.jpg')">
                                             View
                                         </button>
                                     </div>
@@ -457,6 +418,7 @@
             const originalText = convertBtn.innerHTML;
             const fileInput = document.getElementById('documentUpload');
             const file = fileInput.files[0];
+            const selectedModel = document.getElementById('modelDropdown').dataset.selectedModel || 'gemini';
 
             if (!file) {
                 alert('Please select a file first');
@@ -470,7 +432,7 @@
                 // Create FormData and append the file
                 const formData = new FormData();
                 formData.append('image', file);
-                formData.append('model', 'tesseract'); // Default model, can be changed from UI
+                formData.append('model', selectedModel);
 
                 // Make API call
                 const response = await fetch('/convert', {
@@ -580,6 +542,18 @@
             const event = new Event('change');
             document.getElementById('documentUpload').dispatchEvent(event);
         }
+
+        // Model dropdown selection
+        document.querySelectorAll('.model-selector .dropdown-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const modelName = this.textContent;
+                const modelValue = this.dataset.value;
+                const dropdownButton = document.getElementById('modelDropdown');
+                dropdownButton.innerHTML = `<i class="bi bi-robot me-2"></i>${modelName}`;
+                dropdownButton.dataset.selectedModel = modelValue;
+            });
+        });
 
         // History modal functionality
         function showHistoryItem(filename, date, model, originalImg, resultImg) {
