@@ -23,6 +23,12 @@ class UserUpdate(BaseModel):
 class UserStatusUpdate(BaseModel):
     is_active: bool
 
+class UserProfileUpdate(BaseModel):
+    full_name: Optional[str] = Field(None, min_length=2, max_length=100)
+    # Add more profile fields as needed
+    # phone: Optional[str] = None
+    # bio: Optional[str] = None
+
 class UserInDB(UserBase):
     id: str = Field(..., alias="_id")
     is_active: bool

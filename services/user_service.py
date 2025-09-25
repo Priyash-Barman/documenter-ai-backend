@@ -2,7 +2,7 @@
 from bson import ObjectId
 from typing import Optional, Dict, List, Tuple
 from datetime import datetime
-from schemas.user_schema import UserInDB, UserCreate, UserUpdate
+from schemas.user_schema import UserInDB, UserCreate, UserUpdate, UserProfileUpdate
 from utils.logger import logger
 
 class UserService:
@@ -118,6 +118,42 @@ class UserService:
         updated_user = await self.users_collection.find_one({"_id": ObjectId(user_id)})
         updated_user["_id"] = str(updated_user["_id"])
         return UserInDB(**updated_user) if updated_user else None
+
+    async def update_user_profile(self, user_id: str, profile_data: UserProfileUpdate) -> Optional[UserInDB]:
+        """Update user's own profile information"""
+        update_data = profile_data.dict(exclude_unset=True)
+
+        if not update_data:
+            return None
+
+        # Check if email is being updated and if it already exists
+        if 'email' in update_data:
+            existing_user = await self.users_collection.find_one({
+                "email": update_data['email'],
+                "_id": {"$ne": ObjectId(user_id)}
+            })
+            if existing_user:
+                raise ValueError("Email already in use by another account")
+
+        update_data["updated_at"] = datetime.utcnow()
+
+        result = await self.users_collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": update_data}
+        )
+
+        if result.modified_count == 0:
+            return None
+
+        updated_user = await self.users_collection.find_one({"_id": ObjectId(user_id)})
+        if updated_user:
+            updated_user["_id"] = str(updated_user["_id"])
+            return UserInDB(**updated_user)
+        return None
+
+    async def get_user_profile(self, user_id: str) -> Optional[UserInDB]:
+        """Get user's profile by ID"""
+        return await self.get_user_by_id(user_id)
 
     async def change_user_status(self, user_id: str, is_active: bool) -> Optional[UserInDB]:
         await self.users_collection.update_one(

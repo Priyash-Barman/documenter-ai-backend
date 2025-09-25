@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 from schemas.response_schema import ErrorResponse
 from .auth import auth_routes
-from .end_user import user_routes, home_routes
+from .end_user import user_routes, home_routes, profile_routes
 from .admin import (
     manage_user_routes,
     dashboard_routes,
@@ -24,6 +24,7 @@ def register_routes(app: FastAPI):
 
     # end user routes =========
     app.include_router(user_routes.router, prefix="/api/v1", tags=["Users"], responses=ErrorResponse.get_common_responses())
+    app.include_router(profile_routes.router, prefix="", tags=["Profile"], responses=ErrorResponse.get_common_responses())
     # app.include_router(auth_routes.router, prefix="/routes/v1", tags=["Auth"])
 
     # admin routes ============
