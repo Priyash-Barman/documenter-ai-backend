@@ -16,6 +16,7 @@ class HistoryBase(BaseModel):
     req_from: RequestFrom
     user_id: Optional[str] = None
     app_id: Optional[str] = None
+    conversion_id: Optional[str] = None  # Link to detailed conversion data
 
 class HistoryInDB(HistoryBase):
     id: str = Field(..., alias="_id")

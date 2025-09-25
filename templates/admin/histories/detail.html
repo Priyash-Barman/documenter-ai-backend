@@ -2,45 +2,83 @@
 {% block title %}History Details{% endblock %}
 
 {% block content %}
-<h4 class="manage-heading">HISTORY DETAILS</h4>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="manage-heading">HISTORY DETAILS</h4>
+    <a href="/admin/histories" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to List
+    </a>
+</div>
 
-<div class="card">
+<!-- General History Information -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-info-circle me-2"></i>General Information
+        </h6>
+    </div>
     <div class="card-body">
-        <div class="row mb-3">
+        <div class="row">
             <div class="col-md-6">
                 <h5>Request Information</h5>
-                <p><strong>ID:</strong> {{ history.id }}</p>
-                <p><strong>Request From:</strong> {{ history.req_from|title }}</p>
-                <p><strong>User ID:</strong> {{ history.user_id or '-' }}</p>
-                <p><strong>App ID:</strong> {{ history.app_id or '-' }}</p>
-                <p><strong>Timestamp:</strong> {{ history.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                <table class="table table-borderless">
+                    <tr>
+                        <td><strong>ID:</strong></td>
+                        <td>{{ history.id }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Request From:</strong></td>
+                        <td>
+                            <span class="badge {% if history.req_from == 'user' %}bg-primary{% else %}bg-info{% endif %}">
+                                {{ history.req_from|title }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>User ID:</strong></td>
+                        <td>{{ history.user_id or '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>App ID:</strong></td>
+                        <td>{{ history.app_id or '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Timestamp:</strong></td>
+                        <td>
+                            <span title="Indian Standard Time">{{ history.timestamp.strftime('%Y-%m-%d %H:%M:%S IST') }}</span>
+                        </td>
+                    </tr>
+                </table>
             </div>
             <div class="col-md-6">
                 <h5>Request Content</h5>
                 <div class="card bg-light">
                     <div class="card-body">
-                        <pre>{{ history.req_text }}</pre>
+                        <pre class="mb-0">{{ history.req_text }}</pre>
                     </div>
                 </div>
                 {% if history.req_file_url %}
                 <p class="mt-2">
-                    <strong>File:</strong> <a href="{{ history.req_file_url }}" target="_blank">View File</a>
+                    <strong>File:</strong> <a href="{{ history.req_file_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-external-link-alt me-1"></i>View File
+                    </a>
                 </p>
                 {% endif %}
             </div>
         </div>
 
         <div class="row mt-4">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <h5>Response Content</h5>
                 <div class="card bg-light">
                     <div class="card-body">
-                        <pre>{{ history.res_text }}</pre>
+                        <pre class="mb-0">{{ history.res_text }}</pre>
                     </div>
                 </div>
                 {% if history.res_file_url %}
                 <p class="mt-2">
-                    <strong>File:</strong> <a href="{{ history.res_file_url }}" target="_blank">View File</a>
+                    <strong>Response File:</strong> <a href="{{ history.res_file_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-external-link-alt me-1"></i>View File
+                    </a>
                 </p>
                 {% endif %}
             </div>
@@ -48,6 +86,131 @@
     </div>
 </div>
 
-<a href="/admin/histories" class="btn btn-secondary mt-3">Back to List</a>
+<!-- Detailed Conversion Information (if available) -->
+{% if detailed_conversion %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-success">
+            <i class="fas fa-cogs me-2"></i>Conversion Details
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <h6>Processing Information</h6>
+                <table class="table table-sm table-borderless">
+                    <tr>
+                        <td><strong>Conversion ID:</strong></td>
+                        <td><code>{{ detailed_conversion._id }}</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Filename:</strong></td>
+                        <td>{{ detailed_conversion.filename }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Model Used:</strong></td>
+                        <td><span class="badge bg-info">{{ detailed_conversion.model_used }}</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status:</strong></td>
+                        <td>
+                            {% if detailed_conversion.success %}
+                                <span class="badge bg-success">Success</span>
+                            {% else %}
+                                <span class="badge bg-danger">Failed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Processing Time:</strong></td>
+                        <td>{{ "%.2f"|format(detailed_conversion.processing_time) }}s</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-4">
+                <h6>Timeline</h6>
+                <table class="table table-sm table-borderless">
+                    <tr>
+                        <td><strong>Started:</strong></td>
+                        <td>{{ detailed_conversion.created_at.strftime('%Y-%m-%d %H:%M:%S') }} IST</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Completed:</strong></td>
+                        <td>{{ detailed_conversion.completed_at.strftime('%Y-%m-%d %H:%M:%S') }} IST</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status:</strong></td>
+                        <td>
+                            <span class="badge {% if detailed_conversion.status == 'completed' %}bg-success{% else %}bg-warning{% endif %}">
+                                {{ detailed_conversion.status|title }}
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-4">
+                <h6>Text Extraction</h6>
+                <div class="card bg-light">
+                    <div class="card-body p-2">
+                        <small class="text-muted">Extracted Text (first 200 chars):</small>
+                        <pre class="mt-1 mb-0" style="font-size: 0.8rem; max-height: 100px; overflow-y: auto;">{{ detailed_conversion.extracted_text[:200] }}{% if detailed_conversion.extracted_text|length > 200 %}...{% endif %}</pre>
+                        {% if detailed_conversion.extracted_text|length > 200 %}
+                        <button class="btn btn-sm btn-link p-0 mt-1" data-bs-toggle="modal" data-bs-target="#fullTextModal">
+                            View Full Text
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Full Text Modal -->
+<div class="modal fade" id="fullTextModal" tabindex="-1" aria-labelledby="fullTextModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="fullTextModalLabel">Full Extracted Text</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre style="white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto;">{{ detailed_conversion.extracted_text }}</pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="copyToClipboard()">
+                    <i class="fas fa-copy me-1"></i>Copy Text
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyToClipboard() {
+    const textToCopy = `{{ detailed_conversion.extracted_text|safe|replace('\n', '\\n')|replace('\r', '\\r')|replace('"', '\\"') }}`;
+    navigator.clipboard.writeText(textToCopy).then(function() {
+        // Show success message
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-primary');
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Could not copy text: ', err);
+        alert('Failed to copy text to clipboard');
+    });
+}
+</script>
 {% endblock %}

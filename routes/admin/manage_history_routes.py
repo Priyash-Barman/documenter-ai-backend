@@ -7,6 +7,7 @@ from typing import Optional
 from decorators.authenticator import login_required
 from services import services
 from decorators.catch_error import catch_error
+from utils.logger import logger
 
 router = APIRouter(prefix="/histories")
 templates = Jinja2Templates(directory="templates")
@@ -33,6 +34,9 @@ async def list_histories(
     histories, pagination = await services.history_service.get_histories(
         page=page, limit=limit, filters=filters
     )
+    
+    # Get conversion statistics for dashboard display
+    conversion_stats = await services.history_service.get_conversion_history_stats()
 
     return templates.TemplateResponse("admin/histories/list.html", {
         "request": request,
@@ -40,7 +44,8 @@ async def list_histories(
         "req_from": req_from if req_from != "null" else None,
         "user_id": user_id if user_id != "null" else None,
         "app_id": app_id if app_id != "null" else None,
-        "pagination": pagination
+        "pagination": pagination,
+        "conversion_stats": conversion_stats
     })
 
 @router.get("/{history_id}", name="history:detail")
@@ -51,7 +56,21 @@ async def history_detail(request: Request, history_id: str):
     if not history:
         return RedirectResponse(url="/admin/histories", status_code=status.HTTP_302_FOUND)
 
+    # Get detailed conversion info (since we're reading from conversion_history, we already have it)
+    detailed_conversion = None
+    try:
+        from bson import ObjectId
+        detailed_conversion_doc = await services.converter_service.history_collection.find_one({
+            "_id": ObjectId(history_id)
+        })
+        if detailed_conversion_doc:
+            detailed_conversion_doc["_id"] = str(detailed_conversion_doc["_id"])
+            detailed_conversion = detailed_conversion_doc
+    except Exception as e:
+        logger.error(f"Error getting detailed conversion: {str(e)}")
+
     return templates.TemplateResponse("admin/histories/detail.html", {
         "request": request,
-        "history": history
+        "history": history,
+        "detailed_conversion": detailed_conversion
     })

@@ -9,6 +9,7 @@ class ConverterService:
     def __init__(self, mongo):
         self.logs_collection = mongo["logs"]
         self.history_collection = mongo["conversion_history"]
+        self.histories_collection = mongo["histories"]  # Add general history collection
         self.gemini_service = GeminiAIService()
 
     async def convert_image(self, image_data: bytes, model: str, user_id: str = None, filename: str = None) -> bytes:
@@ -19,11 +20,9 @@ class ConverterService:
         start_time = datetime.utcnow()
         
         try:
-
             await self._log_conversion_start(conversion_id, model, user_id, filename)
             
             if model.lower() == "gemini":
-
                 result = await self.gemini_service.digitize_handwritten_text(image_data)
                 
                 if result['success']:
@@ -35,22 +34,39 @@ class ConverterService:
                         extracted_text, True, start_time
                     )
                     
+                    # Also create entry in general history collection
+                    await self._create_general_history(
+                        conversion_id, user_id, filename, model, extracted_text, True, start_time
+                    )
+                    
                     logger.info(f"Gemini conversion successful for {filename}")
                     return processed_image_data
                 else:
-
                     await self._save_conversion_history(
                         conversion_id, user_id, filename, model, 
                         f"Error: {result.get('error', 'Unknown error')}", False, start_time
                     )
+                    
+                    # Also create entry in general history collection
+                    await self._create_general_history(
+                        conversion_id, user_id, filename, model, 
+                        f"Error: {result.get('error', 'Unknown error')}", False, start_time
+                    )
+                    
                     logger.error(f"Gemini conversion failed: {result.get('error')}")
                     return image_data
             else:
-
                 await self._save_conversion_history(
                     conversion_id, user_id, filename, model, 
                     "Model not implemented", False, start_time
                 )
+                
+                # Also create entry in general history collection
+                await self._create_general_history(
+                    conversion_id, user_id, filename, model, 
+                    "Model not implemented", False, start_time
+                )
+                
                 logger.warning(f"Model {model} not implemented, returning original image")
                 return image_data
                 
@@ -60,6 +76,13 @@ class ConverterService:
                 conversion_id, user_id, filename, model, 
                 f"Exception: {str(e)}", False, start_time
             )
+            
+            # Also create entry in general history collection
+            await self._create_general_history(
+                conversion_id, user_id, filename, model, 
+                f"Exception: {str(e)}", False, start_time
+            )
+            
             return image_data
 
     async def _log_conversion_start(self, conversion_id: ObjectId, model: str, user_id: str, filename: str):
@@ -104,6 +127,39 @@ class ConverterService:
             
         except Exception as e:
             logger.error(f"Error saving conversion history: {str(e)}")
+
+    async def _create_general_history(self, conversion_id: ObjectId, user_id: str, filename: str,
+                                    model: str, extracted_text: str, success: bool, start_time: datetime):
+        """Create entry in general history collection for admin panel"""
+        try:
+            end_time = datetime.utcnow()
+            processing_time = (end_time - start_time).total_seconds()
+            
+            # Format request and response for general history
+            req_text = f"Document conversion request - File: {filename}, Model: {model}"
+            if success:
+                res_text = f"Successfully converted document using {model}. Processing time: {processing_time:.2f}s. Extracted text length: {len(extracted_text)} characters."
+            else:
+                res_text = f"Conversion failed: {extracted_text}"
+            
+            general_history = {
+                "_id": ObjectId(),
+                "req_text": req_text,
+                "req_file_url": None,  # Could be added later if file storage is implemented
+                "res_text": res_text,
+                "res_file_url": None,  # Could be added later if file storage is implemented
+                "req_from": "user",
+                "user_id": user_id,
+                "app_id": None,
+                "timestamp": start_time,
+                "conversion_id": str(conversion_id)  # Link to detailed conversion history
+            }
+            
+            await self.histories_collection.insert_one(general_history)
+            logger.info(f"Created general history entry for conversion {conversion_id}")
+            
+        except Exception as e:
+            logger.error(f"Error creating general history: {str(e)}")
 
     async def get_user_conversion_history(self, user_id: str, limit: int = 10, skip: int = 0) -> Tuple[List[Dict], int]:
         """Get user's conversion history with total count"""

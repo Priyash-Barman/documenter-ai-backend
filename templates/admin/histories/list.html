@@ -2,8 +2,77 @@
 {% block title %}Histories List{% endblock %}
 
 {% block content %}
-<h4 class="manage-heading">HISTORIES</h4>
+<h4 class="manage-heading">HISTORY & CONVERSIONS</h4>
 
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Conversions</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ conversion_stats.total_conversions }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-file-alt fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Success Rate</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ "%.1f"|format(conversion_stats.success_rate) }}%</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Recent Activity</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ conversion_stats.recent_activity }}</div>
+                        <div class="text-xs text-muted">Last 24 hours</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Failed Conversions</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ conversion_stats.failed_conversions }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
 <form method="get" class="row g-2 mb-3">
     <div class="col">
         <select name="req_from" class="form-control">
@@ -23,45 +92,137 @@
     </div>
 </form>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Request From</th>
-            <th>User ID</th>
-            <th>App ID</th>
-            <th>Request</th>
-            <th>Timestamp</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for history in histories %}
-        <tr>
-            <td>{{ history.req_from|title }}</td>
-            <td>{{ history.user_id or '-' }}</td>
-            <td>{{ history.app_id or '-' }}</td>
-            <td>{{ history.req_text|truncate(50) }}</td>
-            <td>{{ history.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
-            <td>
-                <a href="/admin/histories/{{ history.id }}" class="btn btn-sm btn-info">Details</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<!-- History Table -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Request History</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>User ID</th>
+                        <th>Request Type</th>
+                        <th>Summary</th>
+                        <th>Timestamp</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for history in histories %}
+                    <tr>
+                        <td>
+                            <span class="badge {% if history.req_from == 'user' %}bg-primary{% else %}bg-info{% endif %}">
+                                {{ history.req_from|title }}
+                            </span>
+                        </td>
+                        <td>{{ history.user_id or '-' }}</td>
+                        <td>
+                            {% if 'conversion' in history.req_text.lower() %}
+                                <i class="fas fa-file-image me-1"></i>Document Conversion
+                            {% else %}
+                                <i class="fas fa-question-circle me-1"></i>General Request
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="max-width: 300px;">
+                                {{ history.req_text|truncate(80) }}
+                                {% if history.req_text|length > 80 %}
+                                    <button class="btn btn-sm btn-link p-0 ms-1" data-bs-toggle="tooltip" 
+                                            title="{{ history.req_text }}">
+                                        <i class="fas fa-info-circle"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-muted small">
+                                <div title="{{ history.timestamp.strftime('%Y-%m-%d %H:%M:%S IST') }}">
+                                    {{ history.timestamp.strftime('%Y-%m-%d') }}<br>
+                                    {{ history.timestamp.strftime('%H:%M:%S') }} IST
+                                </div>
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="/admin/histories/{{ history.id }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> Details
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="fas fa-history fa-3x mb-3"></i>
+                                <h5>No History Found</h5>
+                                <p>No request history available. History will appear here as users interact with the system.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
+<!-- Pagination -->
+{% if pagination.total_pages > 1 %}
 <div class="row">
     <div class="col-12">
-        <nav>
-            <ul class="pagination float-end">
+        <nav aria-label="History pagination">
+            <ul class="pagination justify-content-center">
+                {% if pagination.current_page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pagination.current_page - 1 }}{% if req_from %}&req_from={{ req_from }}{% endif %}{% if user_id %}&user_id={{ user_id }}{% endif %}{% if app_id %}&app_id={{ app_id }}{% endif %}">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                {% endif %}
+                
                 {% for page_num in range(1, pagination.total_pages + 1) %}
-                <li class="page-item {% if page_num == pagination.current_page %}active{% endif %}">
-                    <a class="page-link" href="?page={{ page_num }}{% if req_from %}&req_from={{ req_from }}{% endif %}">{{ page_num }}</a>
-                </li>
+                    {% if page_num == pagination.current_page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                    {% elif page_num == 1 or page_num == pagination.total_pages or (page_num >= pagination.current_page - 2 and page_num <= pagination.current_page + 2) %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_num }}{% if req_from %}&req_from={{ req_from }}{% endif %}{% if user_id %}&user_id={{ user_id }}{% endif %}{% if app_id %}&app_id={{ app_id }}{% endif %}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                    {% elif page_num == pagination.current_page - 3 or page_num == pagination.current_page + 3 %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
                 {% endfor %}
+                
+                {% if pagination.current_page < pagination.total_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pagination.current_page + 1 }}{% if req_from %}&req_from={{ req_from }}{% endif %}{% if user_id %}&user_id={{ user_id }}{% endif %}{% if app_id %}&app_id={{ app_id }}{% endif %}">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
             </ul>
         </nav>
     </div>
 </div>
+{% endif %}
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
 {% endblock %}
