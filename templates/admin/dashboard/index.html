@@ -7,92 +7,430 @@
     <div class="col-md-3">
         <div class="card text-bg-primary mb-4 shadow-sm">
             <div class="card-body">
-                <h5 class="card-title">Total Users</h5>
-                <p class="card-text fs-4">1,234</p>
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-xs font-weight-bold mb-1">Total Users</h5>
+                        <p class="card-text fs-4 mb-0">{{ stats.total_users }}</p>
+                        <small class="text-white-50">{{ stats.active_users }} active</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-white-50"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card text-bg-success mb-4 shadow-sm">
             <div class="card-body">
-                <h5 class="card-title">Active Sessions</h5>
-                <p class="card-text fs-4">567</p>
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-xs font-weight-bold mb-1">Active Sessions</h5>
+                        <p class="card-text fs-4 mb-0">{{ stats.active_sessions }}</p>
+                        <small class="text-white-50">Last hour</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-info mb-4 shadow-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-xs font-weight-bold mb-1">Total Conversions</h5>
+                        <p class="card-text fs-4 mb-0">{{ stats.total_conversions }}</p>
+                        <small class="text-white-50">{{ "%.1f"|format(stats.success_rate) }}% success rate</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-file-alt fa-2x text-white-50"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card text-bg-warning mb-4 shadow-sm">
             <div class="card-body">
-                <h5 class="card-title">Reports</h5>
-                <p class="card-text fs-4">89</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-bg-danger mb-4 shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title">Errors</h5>
-                <p class="card-text fs-4">12</p>
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-xs font-weight-bold mb-1">Recent Errors</h5>
+                        <p class="card-text fs-4 mb-0">{{ stats.recent_errors }}</p>
+                        <small class="text-white-50">Last 24 hours</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-exclamation-triangle fa-2x text-white-50"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Conversion Growth Chart - Improved Compact Design -->
 <div class="card mb-4 shadow-sm">
-    <div class="card-header">
-        <h5 class="mb-0">User Growth</h5>
+    <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center py-2">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-chart-line me-2"></i>
+            <h6 class="mb-0 fw-bold">60-Day Conversion Trends</h6>
+        </div>
+        <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-light btn-sm active" id="totalBtn">
+                <i class="fas fa-chart-area me-1"></i>Total
+            </button>
+            <button type="button" class="btn btn-outline-light btn-sm" id="successBtn">
+                <i class="fas fa-check me-1"></i>Success
+            </button>
+            <button type="button" class="btn btn-outline-light btn-sm" id="failedBtn">
+                <i class="fas fa-times me-1"></i>Failed
+            </button>
+        </div>
     </div>
-    <div class="card-body">
-        <canvas id="userChart" height="100"></canvas>
+    <div class="card-body p-2" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+        <div class="chart-container" style="position: relative; height: 200px;" id="chartContainer">
+            <canvas id="conversionChart"></canvas>
+        </div>
+        <div id="chartError" class="alert alert-warning alert-sm mb-0" style="display: none;">
+            <i class="fas fa-exclamation-triangle me-1"></i>
+            <small>Unable to load chart data. Please refresh the page.</small>
+        </div>
+        <!-- Chart Summary Info -->
+        <div id="chartSummary" class="row mt-2 text-center" style="display: none;">
+
+        </div>
     </div>
 </div>
 
+<!-- Statistics Row -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card border-left-success shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Successful Conversions
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.successful_conversions }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-left-warning shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Failed Conversions
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.failed_conversions }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-left-info shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Recent Activity
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.recent_activity }}</div>
+                        <small class="text-muted">Last 24 hours</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-activity fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
 <div class="card shadow-sm">
     <div class="card-header">
         <h5 class="mb-0">Recent Activity</h5>
     </div>
     <div class="card-body">
-        <ul class="list-group">
-            <li class="list-group-item">User John Doe signed in</li>
-            <li class="list-group-item">New report generated by Admin</li>
-            <li class="list-group-item">System updated to version 1.2.3</li>
-            <li class="list-group-item">User Jane Smith signed out</li>
-        </ul>
+        {% if recent_activity %}
+            <ul class="list-group list-group-flush">
+                {% for activity in recent_activity %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold">
+                            {% if activity.success %}
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                            {% else %}
+                                <i class="fas fa-times-circle text-danger me-2"></i>
+                            {% endif %}
+                            {{ activity.message }}
+                        </div>
+                        <small class="text-muted">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M:%S IST') }}</small>
+                    </div>
+                    <span class="badge bg-{{ 'success' if activity.success else 'danger' }} rounded-pill">
+                        {{ 'Success' if activity.success else 'Failed' }}
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <p>No recent activity to display</p>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #007bff, #0056b3) !important;
+    }
+    
+    .chart-container {
+        position: relative;
+    }
+    
+    .btn-outline-light.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: white;
+    }
+    
+    .btn-outline-light:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+
+    .alert-sm {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .card-header.bg-gradient-primary {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+</style>
 <script>
-    const ctx = document.getElementById('userChart').getContext('2d');
-    const userChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'New Users',
-                data: [120, 150, 180, 170, 220, 260],
-                fill: true,
-                backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                borderColor: '#0d6efd',
-                tension: 0.3
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                }
+    let conversionChart = null;
+    let chartData = null;
+
+    // Initialize chart on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadChartData();
+        
+        // Add button event listeners
+        document.getElementById('totalBtn').addEventListener('click', () => updateChart('total'));
+        document.getElementById('successBtn').addEventListener('click', () => updateChart('success'));
+        document.getElementById('failedBtn').addEventListener('click', () => updateChart('failed'));
+    });
+
+    async function loadChartData() {
+        try {
+            const response = await fetch('/admin/api/conversion-growth');
+            if (!response.ok) {
+                throw new Error('Failed to fetch chart data');
+            }
+            
+            chartData = await response.json();
+            initializeChart();
+            updateSummary();
+            
+            document.getElementById('chartLoading').style.display = 'none';
+            document.getElementById('chartContainer').style.display = 'block';
+            document.getElementById('chartSummary').style.display = 'flex';
+            
+        } catch (error) {
+            console.error('Error loading chart data:', error);
+            document.getElementById('chartLoading').style.display = 'none';
+            document.getElementById('chartError').style.display = 'block';
+        }
+    }
+
+    function initializeChart() {
+        const ctx = document.getElementById('conversionChart').getContext('2d');
+        
+        // Format labels to show only every 10th day for better readability
+        const formattedLabels = chartData.labels.map((label, index) => {
+            if (index % 10 === 0 || index === chartData.labels.length - 1) {
+                const date = new Date(label);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }
+            return '';
+        });
+
+        conversionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: formattedLabels,
+                datasets: [{
+                    label: 'Total Conversions',
+                    data: chartData.datasets.total_conversions,
+                    fill: true,
+                    backgroundColor: 'rgba(13, 110, 253, 0.08)',
+                    borderColor: '#0d6efd',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#0d6efd',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 1,
+                    pointRadius: 2,
+                    pointHoverRadius: 4,
+                    tension: 0.4
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: '#0d6efd',
+                        borderWidth: 1,
+                        cornerRadius: 6,
+                        displayColors: false,
+                        callbacks: {
+                            title: function(context) {
+                                const index = context[0].dataIndex;
+                                return new Date(chartData.labels[index]).toLocaleDateString('en-US', { 
+                                    weekday: 'short', 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                });
+                            },
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            maxTicksLimit: 6,
+                            font: {
+                                size: 10
+                            },
+                            color: '#6c757d'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            borderDash: [2],
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            precision: 0,
+                            maxTicksLimit: 5,
+                            font: {
+                                size: 10
+                            },
+                            color: '#6c757d'
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                },
+                elements: {
+                    point: {
+                        hoverBorderWidth: 2
+                    }
                 }
             }
+        });
+    }
+
+    function updateChart(type) {
+        if (!conversionChart || !chartData) return;
+
+        // Update active button
+        document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+        
+        let dataset, color, bgColor, label;
+        
+        switch(type) {
+            case 'total':
+                dataset = chartData.datasets.total_conversions;
+                color = '#0d6efd';
+                bgColor = 'rgba(13, 110, 253, 0.08)';
+                label = 'Total Conversions';
+                document.getElementById('totalBtn').classList.add('active');
+                break;
+            case 'success':
+                dataset = chartData.datasets.successful_conversions;
+                color = '#198754';
+                bgColor = 'rgba(25, 135, 84, 0.08)';
+                label = 'Successful Conversions';
+                document.getElementById('successBtn').classList.add('active');
+                break;
+            case 'failed':
+                dataset = chartData.datasets.failed_conversions;
+                color = '#dc3545';
+                bgColor = 'rgba(220, 53, 69, 0.08)';
+                label = 'Failed Conversions';
+                document.getElementById('failedBtn').classList.add('active');
+                break;
         }
-    });
+
+        conversionChart.data.datasets[0].data = dataset;
+        conversionChart.data.datasets[0].borderColor = color;
+        conversionChart.data.datasets[0].backgroundColor = bgColor;
+        conversionChart.data.datasets[0].pointBackgroundColor = color;
+        conversionChart.data.datasets[0].label = label;
+        
+        conversionChart.update('active');
+    }
+
+    function updateSummary() {
+        if (!chartData || !chartData.summary) return;
+        
+        document.getElementById('summaryTotal').textContent = chartData.summary.total_period_conversions;
+        document.getElementById('summarySuccess').textContent = chartData.summary.total_period_success;
+        document.getElementById('summaryFailed').textContent = chartData.summary.total_period_failed;
+        document.getElementById('summaryRate').textContent = chartData.summary.period_success_rate.toFixed(1) + '%';
+    }
+
+    // Auto-refresh dashboard stats every 5 minutes
+    setInterval(async function() {
+        try {
+            const response = await fetch('/admin/api/dashboard-stats');
+            if (response.ok) {
+                console.log('Dashboard stats updated');
+            }
+        } catch (error) {
+            console.error('Error refreshing dashboard stats:', error);
+        }
+    }, 300000); // 5 minutes
 </script>
 {% endblock %}

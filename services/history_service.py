@@ -12,6 +12,7 @@ class HistoryService:
     def __init__(self, mongo):
         self.histories_collection = mongo["histories"]
         self.conversion_history_collection = mongo["conversion_history"]
+        self.users_collection = mongo["users"]
 
     def _convert_to_ist(self, utc_datetime):
         """Convert UTC datetime to IST"""
@@ -215,3 +216,194 @@ class HistoryService:
                 "success_rate": 0,
                 "recent_activity": 0
             }
+
+    async def get_dashboard_stats(self) -> Dict:
+        """Get comprehensive dashboard statistics"""
+        try:
+            # Get conversion stats
+            conversion_stats = await self.get_conversion_history_stats()
+            
+            # Get total users
+            total_users = await self.users_collection.count_documents({})
+            active_users = await self.users_collection.count_documents({"is_active": True})
+            
+            # Get active sessions (conversions in last hour)
+            one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+            active_sessions = await self.conversion_history_collection.count_documents({
+                "created_at": {"$gte": one_hour_ago}
+            })
+            
+            # Get recent errors (failed conversions in last 24 hours)
+            yesterday = datetime.utcnow() - timedelta(days=1)
+            recent_errors = await self.conversion_history_collection.count_documents({
+                "success": False,
+                "created_at": {"$gte": yesterday}
+            })
+            
+            return {
+                "total_users": total_users,
+                "active_users": active_users,
+                "active_sessions": active_sessions,
+                "total_conversions": conversion_stats["total_conversions"],
+                "successful_conversions": conversion_stats["successful_conversions"],
+                "failed_conversions": conversion_stats["failed_conversions"],
+                "success_rate": conversion_stats["success_rate"],
+                "recent_errors": recent_errors,
+                "recent_activity": conversion_stats["recent_activity"]
+            }
+        except Exception as e:
+            logger.error(f"Error getting dashboard stats: {str(e)}")
+            return {
+                "total_users": 0,
+                "active_users": 0,
+                "active_sessions": 0,
+                "total_conversions": 0,
+                "successful_conversions": 0,
+                "failed_conversions": 0,
+                "success_rate": 0,
+                "recent_errors": 0,
+                "recent_activity": 0
+            }
+
+    async def get_60_day_conversion_growth(self) -> Dict:
+        """Get 60-day conversion history growth data for dashboard chart"""
+        try:
+            # Calculate date range for last 60 days
+            end_date = datetime.utcnow().replace(hour=23, minute=59, second=59, microsecond=999999)
+            start_date = end_date - timedelta(days=59)  # 60 days including today
+            
+            # Aggregate conversions by day
+            pipeline = [
+                {
+                    "$match": {
+                        "created_at": {
+                            "$gte": start_date,
+                            "$lte": end_date
+                        }
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": {
+                            "year": {"$year": "$created_at"},
+                            "month": {"$month": "$created_at"},
+                            "day": {"$dayOfMonth": "$created_at"}
+                        },
+                        "total_conversions": {"$sum": 1},
+                        "successful_conversions": {
+                            "$sum": {"$cond": [{"$eq": ["$success", True]}, 1, 0]}
+                        },
+                        "failed_conversions": {
+                            "$sum": {"$cond": [{"$eq": ["$success", False]}, 1, 0]}
+                        }
+                    }
+                },
+                {
+                    "$sort": {"_id": 1}
+                }
+            ]
+            
+            results = await self.conversion_history_collection.aggregate(pipeline).to_list(length=None)
+            
+            # Create a complete 60-day dataset with zeros for missing days
+            daily_data = {}
+            current_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            
+            # Initialize all days with zero values
+            for i in range(60):
+                date_key = current_date.strftime("%Y-%m-%d")
+                daily_data[date_key] = {
+                    "date": date_key,
+                    "total_conversions": 0,
+                    "successful_conversions": 0,
+                    "failed_conversions": 0
+                }
+                current_date += timedelta(days=1)
+            
+            # Fill in actual data
+            for result in results:
+                date_obj = datetime(
+                    year=result["_id"]["year"],
+                    month=result["_id"]["month"],
+                    day=result["_id"]["day"]
+                )
+                date_key = date_obj.strftime("%Y-%m-%d")
+                
+                if date_key in daily_data:
+                    daily_data[date_key]["total_conversions"] = result["total_conversions"]
+                    daily_data[date_key]["successful_conversions"] = result["successful_conversions"]
+                    daily_data[date_key]["failed_conversions"] = result["failed_conversions"]
+            
+            # Convert to sorted list
+            growth_data = list(daily_data.values())
+            growth_data.sort(key=lambda x: x["date"])
+            
+            # Format for chart.js
+            labels = [item["date"] for item in growth_data]
+            total_data = [item["total_conversions"] for item in growth_data]
+            success_data = [item["successful_conversions"] for item in growth_data]
+            failed_data = [item["failed_conversions"] for item in growth_data]
+            
+            return {
+                "labels": labels,
+                "datasets": {
+                    "total_conversions": total_data,
+                    "successful_conversions": success_data,
+                    "failed_conversions": failed_data
+                },
+                "summary": {
+                    "total_period_conversions": sum(total_data),
+                    "total_period_success": sum(success_data),
+                    "total_period_failed": sum(failed_data),
+                    "period_success_rate": (sum(success_data) / sum(total_data) * 100) if sum(total_data) > 0 else 0
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting 60-day conversion growth: {str(e)}")
+            return {
+                "labels": [],
+                "datasets": {
+                    "total_conversions": [],
+                    "successful_conversions": [],
+                    "failed_conversions": []
+                },
+                "summary": {
+                    "total_period_conversions": 0,
+                    "total_period_success": 0,
+                    "total_period_failed": 0,
+                    "period_success_rate": 0
+                }
+            }
+
+    async def get_recent_activity_feed(self, limit: int = 10) -> List[Dict]:
+        """Get recent activity feed for dashboard"""
+        try:
+            # Get recent conversions
+            conversions = await self.conversion_history_collection.find().sort("created_at", -1).limit(limit).to_list(length=limit)
+            
+            activity_feed = []
+            for conversion in conversions:
+                user_id = conversion.get("user_id", "Unknown")
+                filename = conversion.get("filename", "unknown_file")
+                success = conversion.get("success", False)
+                created_at = conversion.get("created_at", datetime.utcnow())
+                
+                # Convert to IST for display
+                created_at_ist = self._convert_to_ist(created_at)
+                
+                activity = {
+                    "type": "conversion",
+                    "message": f"{'Successful' if success else 'Failed'} conversion of '{filename}' by user {user_id}",
+                    "timestamp": created_at_ist,
+                    "success": success,
+                    "user_id": user_id,
+                    "filename": filename
+                }
+                activity_feed.append(activity)
+            
+            return activity_feed
+            
+        except Exception as e:
+            logger.error(f"Error getting recent activity feed: {str(e)}")
+            return []
