@@ -162,35 +162,116 @@
 
 <!-- Recent Activity -->
 <div class="card shadow-sm">
-    <div class="card-header">
-        <h5 class="mb-0">Recent Activity</h5>
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-history text-primary me-2"></i>
+            <h5 class="mb-0 fw-bold">Recent Activity</h5>
+        </div>
+        <small class="text-muted">Last {{ activity_pagination.total_items }} activities</small>
     </div>
-    <div class="card-body">
+    <div class="card-body p-0">
         {% if recent_activity %}
-            <ul class="list-group list-group-flush">
+            <div class="activity-feed">
                 {% for activity in recent_activity %}
-                <li class="list-group-item d-flex justify-content-between align-items-start">
-                    <div class="ms-2 me-auto">
-                        <div class="fw-bold">
-                            {% if activity.success %}
-                                <i class="fas fa-check-circle text-success me-2"></i>
-                            {% else %}
-                                <i class="fas fa-times-circle text-danger me-2"></i>
-                            {% endif %}
+                <div class="activity-item d-flex align-items-start p-3 border-bottom border-light">
+                    <div class="activity-icon me-3 mt-1">
+                        {% if activity.success %}
+                            <div class="rounded-circle bg-success bg-opacity-10 p-2">
+                                <i class="fas fa-check text-success"></i>
+                            </div>
+                        {% else %}
+                            <div class="rounded-circle bg-danger bg-opacity-10 p-2">
+                                <i class="fas fa-times text-danger"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="activity-content flex-grow-1">
+                        <div class="activity-message fw-medium text-dark mb-1">
                             {{ activity.message }}
                         </div>
-                        <small class="text-muted">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M:%S IST') }}</small>
+                        <div class="d-flex align-items-center text-muted">
+                            <small class="me-3">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ activity.timestamp.strftime('%b %d, %Y at %H:%M') }}
+                            </small>
+                            <small>
+                                <i class="fas fa-user me-1"></i>
+                                User: {{ activity.user_id }}
+                            </small>
+                        </div>
                     </div>
-                    <span class="badge bg-{{ 'success' if activity.success else 'danger' }} rounded-pill">
-                        {{ 'Success' if activity.success else 'Failed' }}
-                    </span>
-                </li>
+                </div>
                 {% endfor %}
-            </ul>
+            </div>
+            
+            <!-- Pagination for Recent Activity -->
+            {% if activity_pagination.total_pages > 1 %}
+            <div class="card-footer bg-white border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="pagination-info">
+                        <small class="text-muted">
+                            Showing {{ ((activity_pagination.current_page - 1) * 6) + 1 }} to 
+                            {{ activity_pagination.current_page * 6 if activity_pagination.current_page * 6 <= activity_pagination.total_items else activity_pagination.total_items }} 
+                            of {{ activity_pagination.total_items }} activities
+                        </small>
+                    </div>
+                    <nav aria-label="Recent activity pagination">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if activity_pagination.prev_page %}
+                                <li class="page-item">
+                                    <a class="page-link px-3" href="?activity_page={{ activity_pagination.prev_page }}" title="Previous page">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link px-3">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                </li>
+                            {% endif %}
+                            
+                            {% for page_num in range(1, activity_pagination.total_pages + 1) %}
+                                {% if page_num == activity_pagination.current_page %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% elif page_num == 1 or page_num == activity_pagination.total_pages or (page_num >= activity_pagination.current_page - 1 and page_num <= activity_pagination.current_page + 1) %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?activity_page={{ page_num }}">{{ page_num }}</a>
+                                    </li>
+                                {% elif page_num == activity_pagination.current_page - 2 or page_num == activity_pagination.current_page + 2 %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">…</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if activity_pagination.next_page %}
+                                <li class="page-item">
+                                    <a class="page-link px-3" href="?activity_page={{ activity_pagination.next_page }}" title="Next page">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link px-3">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            {% endif %}
         {% else %}
-            <div class="text-center text-muted py-4">
-                <i class="fas fa-inbox fa-3x mb-3"></i>
-                <p>No recent activity to display</p>
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="fas fa-history text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+                <h6 class="text-muted mb-2">No Recent Activity</h6>
+                <p class="text-muted small mb-0">Activity will appear here as users interact with the system</p>
             </div>
         {% endif %}
     </div>
@@ -227,6 +308,159 @@
     
     .card-header.bg-gradient-primary {
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Recent Activity Styles */
+    .activity-feed .activity-item:last-child {
+        border-bottom: none !important;
+    }
+    
+    .activity-item {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .activity-item:hover {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-left: 3px solid #3b82f6;
+        padding-left: calc(1rem - 3px) !important;
+    }
+    
+    .activity-icon {
+        min-width: 42px;
+    }
+    
+    .activity-icon > div {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border: 2px solid white;
+    }
+    
+    .activity-content .activity-message {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #1f2937;
+        margin-bottom: 6px;
+    }
+    
+    .activity-content small {
+        font-size: 0.8rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+    
+    .activity-content small i {
+        opacity: 0.7;
+        width: 12px;
+    }
+    
+    /* Modern Pagination */
+    .bg-gray-50 {
+        background-color: #f9fafb !important;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .pagination-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+    }
+    
+    .pagination-info .text-sm {
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .text-gray-600 {
+        color: #6b7280;
+    }
+    
+    .pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .pagination-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        background-color: white;
+        color: #6b7280;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .pagination-btn:hover:not(.pagination-btn-disabled) {
+        border-color: #3b82f6;
+        background-color: #eff6ff;
+        color: #3b82f6;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+    
+    .pagination-btn-disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+    
+    .pagination-pages {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin: 0 0.75rem;
+    }
+    
+    .pagination-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 10px;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #6b7280;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .pagination-number:hover {
+        background-color: #f3f4f6;
+        color: #374151;
+        transform: translateY(-1px);
+    }
+    
+    .pagination-number-active {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        transform: translateY(-1px);
+    }
+    
+    .pagination-ellipsis {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        color: #9ca3af;
+        font-weight: 600;
+    }
+    
+    .card-footer {
+        padding: 1rem 1.25rem;
     }
 </style>
 <script>

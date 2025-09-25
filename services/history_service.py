@@ -376,11 +376,17 @@ class HistoryService:
                 }
             }
 
-    async def get_recent_activity_feed(self, limit: int = 10) -> List[Dict]:
-        """Get recent activity feed for dashboard"""
+    async def get_recent_activity_feed(self, page: int = 1, limit: int = 10) -> Tuple[List[Dict], Dict]:
+        """Get recent activity feed for dashboard with pagination"""
         try:
-            # Get recent conversions
-            conversions = await self.conversion_history_collection.find().sort("created_at", -1).limit(limit).to_list(length=limit)
+            # Calculate skip for pagination
+            skip = (page - 1) * limit
+            
+            # Get total count
+            total = await self.conversion_history_collection.count_documents({})
+            
+            # Get recent conversions with pagination
+            conversions = await self.conversion_history_collection.find().sort("created_at", -1).skip(skip).limit(limit).to_list(length=limit)
             
             activity_feed = []
             for conversion in conversions:
@@ -401,9 +407,30 @@ class HistoryService:
                     "filename": filename
                 }
                 activity_feed.append(activity)
+
+            # Calculate pagination
+            total_pages = (total + limit - 1) // limit
+            next_page = page + 1 if page < total_pages else None
+            prev_page = page - 1 if page > 1 else None
+
+            pagination = {
+                "current_page": page,
+                "next_page": next_page,
+                "prev_page": prev_page,
+                "total_pages": total_pages,
+                "total_items": total
+            }
             
-            return activity_feed
+            return activity_feed, pagination
             
         except Exception as e:
             logger.error(f"Error getting recent activity feed: {str(e)}")
-            return []
+            # Return empty pagination for error case
+            empty_pagination = {
+                "current_page": 1,
+                "next_page": None,
+                "prev_page": None,
+                "total_pages": 1,
+                "total_items": 0
+            }
+            return [], empty_pagination

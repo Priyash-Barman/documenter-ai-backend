@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Query
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse
 
@@ -12,15 +12,20 @@ templates = Jinja2Templates(directory="templates")
 @router.get("")
 @catch_error
 @login_required("admin")
-async def dashboard(request: Request):
+async def dashboard(request: Request, activity_page: int = Query(1, ge=1)):
     # Get dynamic dashboard statistics
     dashboard_stats = await services.history_service.get_dashboard_stats()
-    recent_activity = await services.history_service.get_recent_activity_feed(limit=5)
+    recent_activity, activity_pagination = await services.history_service.get_recent_activity_feed(
+        page=activity_page, 
+        limit=6
+    )
     
     return templates.TemplateResponse("admin/dashboard/index.html", {
         "request": request,
         "stats": dashboard_stats,
-        "recent_activity": recent_activity
+        "recent_activity": recent_activity,
+        "activity_pagination": activity_pagination,
+        "activity_page": activity_page
     })
 
 @router.get("/api/conversion-growth")
