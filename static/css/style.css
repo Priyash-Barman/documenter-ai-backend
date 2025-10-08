@@ -166,27 +166,10 @@ body {
 .auth-form-container {
     max-width: 420px;
     width: 100%;
+    padding: 0;
 }
 
-.auth-card {
-    background: white;
-    border-radius: 16px;
-    padding: 40px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e2e8f0;
-}
-
-.auth-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #3b82f6, #1e40af);
-    border-radius: 24px 24px 0 0;
-}
-
+/* Removed card styling for a cleaner look */
 .auth-header {
     text-align: center;
     margin-bottom: 32px;
@@ -478,10 +461,6 @@ body {
     .auth-left,
     .auth-right {
         padding: 20px;
-    }
-    
-    .auth-card {
-        padding: 30px 24px;
     }
     
     .welcome-title {

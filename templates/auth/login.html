@@ -90,137 +90,135 @@
         <!-- Right Side - Authentication Forms -->
         <div class="auth-right">
             <div class="auth-form-container">
-                <div class="auth-card">
-                    <!-- Step Indicator -->
-                    <div class="step-indicator">
-                        <div class="step-dot {% if step == 'email' %}active{% else %}completed{% endif %}"></div>
-                        <div class="step-line {% if step != 'email' %}completed{% endif %}"></div>
-                        <div class="step-dot {% if step == 'otp' %}active{% elif step == 'name' %}completed{% elif step == 'email' %}{% else %}completed{% endif %}"></div>
-                        <div class="step-line {% if step == 'name' %}completed{% endif %}"></div>
-                        <div class="step-dot {% if step == 'name' %}active{% endif %}"></div>
-                    </div>
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step-dot {% if step == 'email' %}active{% else %}completed{% endif %}"></div>
+                    <div class="step-line {% if step != 'email' %}completed{% endif %}"></div>
+                    <div class="step-dot {% if step == 'otp' %}active{% elif step == 'name' %}completed{% elif step == 'email' %}{% else %}completed{% endif %}"></div>
+                    <div class="step-line {% if step == 'name' %}completed{% endif %}"></div>
+                    <div class="step-dot {% if step == 'name' %}active{% endif %}"></div>
+                </div>
 
-                    <!-- Email Step -->
-                    <div class="step {% if step == 'email' %}d-block{% else %}d-none{% endif %}" id="email-step">
-                        <div class="auth-header">
-                            <h2>Welcome Back</h2>
-                            <p>Enter your email address to continue</p>
+                <!-- Email Step -->
+                <div class="step {% if step == 'email' %}d-block{% else %}d-none{% endif %}" id="email-step">
+                    <div class="auth-header">
+                        <h2>Welcome Back</h2>
+                        <p>Enter your email address to continue</p>
+                    </div>
+                    
+                    <form method="post" action="/send-otp" id="emailForm">
+                        <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="email">
+                                <i class="fas fa-envelope me-2"></i>Email Address
+                            </label>
+                            <input type="email" id="email" name="email" class="form-input" 
+                                   placeholder="Enter your email address" required>
                         </div>
                         
-                        <form method="post" action="/send-otp" id="emailForm">
-                            <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="email">
-                                    <i class="fas fa-envelope me-2"></i>Email Address
-                                </label>
-                                <input type="email" id="email" name="email" class="form-input" 
-                                       placeholder="Enter your email address" required>
-                            </div>
-                            
-                            <button type="submit" class="btn-primary-auth" id="emailSubmitBtn">
-                                <i class="fas fa-paper-plane"></i>
-                                <span>Send Verification Code</span>
-                            </button>
-                        </form>
+                        <button type="submit" class="btn-primary-auth" id="emailSubmitBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Send Verification Code</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- OTP Step -->
+                <div class="step {% if step == 'otp' %}d-block{% else %}d-none{% endif %}" id="otp-step">
+                    <div class="auth-header">
+                        <h2>Verify Your Email</h2>
+                        <p>Enter the 6-digit code we sent to your email</p>
                     </div>
 
-                    <!-- OTP Step -->
-                    <div class="step {% if step == 'otp' %}d-block{% else %}d-none{% endif %}" id="otp-step">
-                        <div class="auth-header">
-                            <h2>Verify Your Email</h2>
-                            <p>Enter the 6-digit code we sent to your email</p>
-                        </div>
+                    {% if email %}
+                    <div class="auth-info">
+                        <i class="fas fa-envelope me-2"></i>
+                        Code sent to <strong>{{ email }}</strong>
+                    </div>
+                    {% endif %}
 
-                        {% if email %}
-                        <div class="auth-info">
-                            <i class="fas fa-envelope me-2"></i>
-                            Code sent to <strong>{{ email }}</strong>
-                        </div>
-                        {% endif %}
+                    {% if error %}
+                    <div class="alert-modern alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>{{ error }}</span>
+                    </div>
+                    {% endif %}
 
-                        {% if error %}
-                        <div class="alert-modern alert-danger">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>{{ error }}</span>
+                    <form method="post" action="/verify-otp" id="otpForm">
+                        <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
+                        <input type="hidden" name="email" value="{{ email }}">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="otp">
+                                <i class="fas fa-shield-alt me-2"></i>Verification Code
+                            </label>
+                            <input type="text" class="form-input otp-input" id="otp" name="otp" 
+                                   placeholder="000000" required pattern="\d{6}" 
+                                   maxlength="6" title="Please enter a 6-digit code">
                         </div>
-                        {% endif %}
+                        
+                        <button type="submit" class="btn-primary-auth" id="otpSubmitBtn">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Verify Code</span>
+                        </button>
+                    </form>
 
-                        <form method="post" action="/verify-otp" id="otpForm">
-                            <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
-                            <input type="hidden" name="email" value="{{ email }}">
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="otp">
-                                    <i class="fas fa-shield-alt me-2"></i>Verification Code
-                                </label>
-                                <input type="text" class="form-input otp-input" id="otp" name="otp" 
-                                       placeholder="000000" required pattern="\d{6}" 
-                                       maxlength="6" title="Please enter a 6-digit code">
-                            </div>
-                            
-                            <button type="submit" class="btn-primary-auth" id="otpSubmitBtn">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Verify Code</span>
-                            </button>
-                        </form>
+                    <div class="resend-section">
+                        <p>Didn't receive the code?</p>
+                        <button type="button" id="resend-btn" class="btn-secondary-auth"
+                                {% if resend_cooldown and resend_cooldown > 0 %}disabled{% endif %}>
+                            <i class="fas fa-redo"></i>
+                            <span>
+                                {% if resend_cooldown and resend_cooldown > 0 %}
+                                    Resend in <span class="countdown-timer" id="countdown">{{ resend_cooldown }}</span>s
+                                {% else %}
+                                    Resend Code
+                                {% endif %}
+                            </span>
+                        </button>
+                    </div>
+                </div>
 
-                        <div class="resend-section">
-                            <p>Didn't receive the code?</p>
-                            <button type="button" id="resend-btn" class="btn-secondary-auth"
-                                    {% if resend_cooldown and resend_cooldown > 0 %}disabled{% endif %}>
-                                <i class="fas fa-redo"></i>
-                                <span>
-                                    {% if resend_cooldown and resend_cooldown > 0 %}
-                                        Resend in <span class="countdown-timer" id="countdown">{{ resend_cooldown }}</span>s
-                                    {% else %}
-                                        Resend Code
-                                    {% endif %}
-                                </span>
-                            </button>
-                        </div>
+                <!-- Registration Step -->
+                <div class="step {% if step == 'name' %}d-block{% else %}d-none{% endif %}" id="name-step">
+                    <div class="auth-header">
+                        <h2>Complete Your Profile</h2>
+                        <p>Tell us your name to finish setting up your account</p>
                     </div>
 
-                    <!-- Registration Step -->
-                    <div class="step {% if step == 'name' %}d-block{% else %}d-none{% endif %}" id="name-step">
-                        <div class="auth-header">
-                            <h2>Complete Your Profile</h2>
-                            <p>Tell us your name to finish setting up your account</p>
-                        </div>
-
-                        {% if email %}
-                        <div class="auth-info">
-                            <i class="fas fa-user-plus me-2"></i>
-                            Creating account for <strong>{{ email }}</strong>
-                        </div>
-                        {% endif %}
-
-                        {% if error %}
-                        <div class="alert-modern alert-danger">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>{{ error }}</span>
-                        </div>
-                        {% endif %}
-
-                        <form method="post" action="/complete-registration" id="nameForm">
-                            <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
-                            <input type="hidden" name="email" value="{{ email }}">
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="full_name">
-                                    <i class="fas fa-user me-2"></i>Full Name
-                                </label>
-                                <input type="text" id="full_name" name="full_name" class="form-input"
-                                       placeholder="Enter your full name" required 
-                                       minlength="2" maxlength="100">
-                            </div>
-                            
-                            <button type="submit" class="btn-primary-auth" id="nameSubmitBtn">
-                                <i class="fas fa-rocket"></i>
-                                <span>Complete Setup</span>
-                            </button>
-                        </form>
+                    {% if email %}
+                    <div class="auth-info">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Creating account for <strong>{{ email }}</strong>
                     </div>
+                    {% endif %}
+
+                    {% if error %}
+                    <div class="alert-modern alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>{{ error }}</span>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" action="/complete-registration" id="nameForm">
+                        <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
+                        <input type="hidden" name="email" value="{{ email }}">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="full_name">
+                                <i class="fas fa-user me-2"></i>Full Name
+                            </label>
+                            <input type="text" id="full_name" name="full_name" class="form-input"
+                                   placeholder="Enter your full name" required 
+                                   minlength="2" maxlength="100">
+                        </div>
+                        
+                        <button type="submit" class="btn-primary-auth" id="nameSubmitBtn">
+                            <i class="fas fa-rocket"></i>
+                            <span>Complete Setup</span>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

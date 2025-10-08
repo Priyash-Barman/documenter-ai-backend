@@ -13,7 +13,7 @@ class GeminiAIService:
         """Initialize Gemini service with API key"""
         try:
             genai.configure(api_key=config.GEMINI_API_KEY)
-            self.model = genai.GenerativeModel('gemini-2.0-flash-lite')
+            self.model = genai.GenerativeModel('gemini-2.5-flash')
             logger.info("Gemini service initialized successfully")
         except Exception as e:
             logger.error(f"Error initializing Gemini service: {str(e)}")
