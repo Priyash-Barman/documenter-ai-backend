@@ -22,6 +22,8 @@
             --gradient-end: #3a0ca3;
             --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --transition: all 0.3s ease;
+            --neon-glow: 0 0 10px rgba(67, 97, 238, 0.5);
+            --card-bg: rgba(255, 255, 255, 0.85);
         }
 
         body {
@@ -29,7 +31,16 @@
             color: #333;
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            padding-bottom: 2rem;
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            padding-bottom: 0;
         }
 
         .navbar {
@@ -65,6 +76,7 @@
             object-fit: cover;
             margin-right: 10px;
             border: 2px solid var(--primary-color);
+            box-shadow: var(--neon-glow);
         }
 
         .dropdown-menu {
@@ -95,6 +107,8 @@
             text-align: center;
             position: relative;
             overflow: hidden;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            box-shadow: 0 15px 30px rgba(67, 97, 238, 0.1);
         }
 
         .hero-section::before {
@@ -121,6 +135,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(67, 97, 238, 0.1);
         }
 
         .hero-subtitle {
@@ -136,8 +151,22 @@
             box-shadow: var(--card-shadow);
             transition: var(--transition);
             position: relative;
-            background: rgba(255, 255, 255, 0.85);
+            background: var(--card-bg);
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 16px 16px 0 0;
+            opacity: 0.8;
         }
 
         .card:hover {
@@ -150,11 +179,37 @@
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             font-weight: 600;
             padding: 1.25rem 1.5rem;
+            position: relative;
+        }
+
+        .card-header::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 1.5rem;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 3px;
         }
 
         .card-title {
             font-weight: 700;
             color: var(--dark-color);
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.75rem;
+        }
+
+        .card-title::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 3px;
         }
 
         .card-title i {
@@ -162,6 +217,25 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .card-body {
+            position: relative;
+            z-index: 1;
+            padding: 1.75rem;
+        }
+
+        .card-body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="90" cy="10" r="0.5" fill="%234361ee" opacity="0.1"/><circle cx="10" cy="90" r="0.5" fill="%234361ee" opacity="0.1"/><circle cx="50" cy="50" r="0.5" fill="%234361ee" opacity="0.1"/></svg>');
+            background-size: 100px 100px;
+            z-index: -1;
+            opacity: 0.3;
         }
 
         .upload-area {
@@ -174,17 +248,20 @@
             background-color: white;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .upload-area:hover {
             border-color: var(--primary-color);
             background-color: rgba(67, 97, 238, 0.05);
+            box-shadow: 0 8px 15px rgba(67, 97, 238, 0.1);
         }
 
         .upload-area.drag-over {
             border-color: var(--primary-color);
             background-color: rgba(67, 97, 238, 0.1);
             transform: scale(1.02);
+            box-shadow: var(--neon-glow);
         }
 
         .upload-icon {
@@ -232,11 +309,13 @@
             margin-bottom: 1rem;
             padding: 1.25rem;
             background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
         }
 
         .history-item:hover {
             background-color: rgba(67, 97, 238, 0.05);
             transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.1);
         }
 
         .badge {
@@ -309,6 +388,7 @@
             border-radius: 12px;
             margin-bottom: 1rem;
             border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .result-image {
@@ -317,6 +397,7 @@
             border-radius: 12px;
             margin-bottom: 1rem;
             border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .modal-document-image {
@@ -390,6 +471,18 @@
             box-shadow: var(--card-shadow);
             transition: var(--transition);
             border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
         }
 
         .stats-card:hover {
@@ -436,10 +529,31 @@
             box-shadow: var(--card-shadow);
             transition: var(--transition);
             height: 100%;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
         .feature-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(67, 97, 238, 0.15);
+        }
+
+        .feature-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover::after {
+            transform: scaleX(1);
         }
 
         .feature-icon {
@@ -453,6 +567,7 @@
             background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(58, 12, 163, 0.1));
             font-size: 1.8rem;
             color: var(--primary-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .feature-title {
@@ -472,6 +587,20 @@
             text-align: center;
             margin-bottom: 3rem;
             color: var(--dark-color);
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 2px;
         }
 
         .section-title span {
@@ -482,13 +611,56 @@
         }
 
         /* Responsive adjustments */
-        @media (max-width: 768px) {
+        @media (max-width: 1200px) {
+            .col-lg-10 {
+                max-width: 95%;
+            }
+        }
+        
+        @media (max-width: 992px) {
             .hero-title {
-                font-size: 2rem;
+                font-size: 2.2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 1.7rem;
+            }
+            
+            .feature-card {
+                padding: 1.5rem 1rem;
+            }
+            
+            .feature-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.3rem;
+            }
+            
+            .hero-section {
+                padding: 2.5rem 1.5rem;
+            }
+            
+            .hero-title {
+                font-size: 1.8rem;
             }
             
             .hero-subtitle {
                 font-size: 1rem;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+                margin-bottom: 2rem;
             }
             
             .upload-area {
@@ -502,6 +674,42 @@
             .card-body {
                 padding: 1.25rem;
             }
+            
+            .d-flex.justify-content-center.gap-3 {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .btn-primary, .btn-outline-primary {
+                width: 100%;
+            }
+            
+            .feature-card {
+                margin-bottom: 1.5rem;
+            }
+            
+            .model-selector {
+                position: relative !important;
+                top: 0 !important;
+                right: 0 !important;
+                margin: 1rem 0;
+                text-align: center;
+            }
+            
+            .model-selector .dropdown-toggle {
+                width: 100%;
+            }
+            
+            /* History item adjustments */
+            .history-item {
+                padding: 1rem;
+            }
+            
+            /* Pagination adjustments */
+            .pagination .page-link {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.9rem;
+            }
         }
 
         @media (max-width: 576px) {
@@ -509,17 +717,603 @@
                 padding: 0.8rem 1rem;
             }
             
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            
+            .user-avatar {
+                width: 36px;
+                height: 36px;
+            }
+            
             .hero-section {
                 padding: 2rem 1rem;
             }
             
             .hero-title {
-                font-size: 1.75rem;
+                font-size: 1.6rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 0.95rem;
             }
             
             .section-title {
-                font-size: 1.5rem;
+                font-size: 1.3rem;
             }
+            
+            .upload-area {
+                padding: 1.25rem;
+            }
+            
+            .upload-icon {
+                font-size: 2.5rem;
+            }
+            
+            .stats-card {
+                padding: 1.25rem 1rem;
+            }
+            
+            .stats-card .number {
+                font-size: 1.3rem;
+            }
+            
+            .feature-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+                margin-bottom: 1rem;
+            }
+            
+            .feature-title {
+                font-size: 1.1rem;
+            }
+            
+            .feature-desc {
+                font-size: 0.9rem;
+            }
+            
+            /* Preview section adjustments */
+            #previewSection .col-md-6 {
+                margin-bottom: 1.5rem;
+            }
+            
+            .d-flex.justify-content-end.mt-4 {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .btn-primary.me-2, .btn-outline-secondary {
+                width: 100%;
+                margin-right: 0 !important;
+            }
+            
+            /* Modal adjustments */
+            .modal-document-image {
+                max-height: 250px;
+            }
+            
+            /* History item adjustments */
+            .history-item .d-flex {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .history-item .d-flex > div:last-child {
+                align-self: flex-start;
+            }
+            
+            /* Pagination adjustments */
+            .pagination {
+                flex-wrap: wrap;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .hero-title {
+                font-size: 1.4rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+            
+            .card-title {
+                font-size: 1.2rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* New enhancements */
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.05;
+            background: var(--primary-color);
+            border-radius: 50%;
+        }
+
+        .shape-1 {
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            left: 5%;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        .shape-2 {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            right: 10%;
+            animation: float 6s infinite ease-in-out reverse;
+        }
+
+        .shape-3 {
+            width: 40px;
+            height: 40px;
+            top: 40%;
+            right: 20%;
+            animation: float 10s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            50% {
+                transform: translate(10px, 15px) rotate(180deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .neon-text {
+            text-shadow: 0 0 5px rgba(67, 97, 238, 0.5);
+        }
+
+        .hover-glow {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .hover-glow:hover {
+            box-shadow: 0 0 15px rgba(67, 97, 238, 0.4);
+        }
+
+        .gradient-border {
+            position: relative;
+            border: none;
+        }
+
+        .gradient-border::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 18px;
+            z-index: -1;
+        }
+
+        .testimonial-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .author-info h6 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .author-info small {
+            color: #777;
+        }
+
+        .pricing-card {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease;
+            background: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .pricing-header {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .pricing-body {
+            padding: 1.5rem;
+        }
+
+        .pricing-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .pricing-features li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+
+        .pricing-features li i {
+            color: var(--success-color);
+            margin-right: 0.5rem;
+        }
+
+        .btn-pricing {
+            width: 100%;
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 0.75rem;
+        }
+
+        .btn-pricing.outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-pricing.outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .faq-item {
+            margin-bottom: 1rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eee;
+        }
+
+        .faq-question {
+            padding: 1rem 1.5rem;
+            background: white;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            background: #f9fafb;
+        }
+
+        .faq-answer.show {
+            padding: 1rem 1.5rem;
+            max-height: 500px;
+        }
+
+        .faq-toggle {
+            transition: transform 0.3s ease;
+        }
+
+        .faq-toggle.rotate {
+            transform: rotate(180deg);
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            color: white;
+            margin: 3rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section h2 {
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-cta {
+            background: white;
+            color: var(--primary-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 3rem 0 1.5rem;
+            margin-top: 0;
+            flex-shrink: 0;
+        }
+
+        .footer h5 {
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .footer h5::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--primary-color);
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: #aaa;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* Enhanced Card Body Styles */
+        .enhanced-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .enhanced-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .enhanced-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 16px 16px 0 0;
+        }
+
+        .enhanced-card-body {
+            padding: 1.75rem;
+            position: relative;
+        }
+
+        .enhanced-card-body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="95" cy="5" r="0.8" fill="%234361ee" opacity="0.15"/><circle cx="5" cy="95" r="0.8" fill="%234361ee" opacity="0.15"/><circle cx="50" cy="50" r="0.8" fill="%234361ee" opacity="0.15"/></svg>');
+            background-size: 120px 120px;
+            z-index: -1;
+            opacity: 0.2;
+        }
+
+        .enhanced-card-title {
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.75rem;
+            font-size: 1.5rem;
+        }
+
+        .enhanced-card-title::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 3px;
+        }
+
+        .enhanced-card-title i {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-right: 0.5rem;
+        }
+
+        .card-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(67, 97, 238, 0.2), transparent);
+            margin: 1.5rem 0;
+        }
+
+        .card-highlight {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.05), rgba(58, 12, 163, 0.05));
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            margin: 1rem 0;
+        }
+
+        .card-highlight-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-highlight-title i {
+            margin-right: 0.5rem;
+        }
+
+        .card-action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .card-action-buttons .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .card-stat {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(58, 12, 163, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            color: var(--primary-color);
+        }
+
+        .card-stat-content {
+            flex: 1;
+        }
+
+        .card-stat-value {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--dark-color);
+        }
+
+        .card-stat-label {
+            font-size: 0.85rem;
+            color: #6c757d;
         }
     </style>
 </head>
@@ -539,7 +1333,7 @@
             <div class="dropdown">
                 <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     <img src="https://ui-avatars.com/api/?name={{ user.full_name }}&background=4361ee&color=fff" alt="User" class="user-avatar">
-                    <span class="d-none d-md-inline">{{ user.full_name }}</span>
+                    <span class="d-none d-md-inline ms-2">{{ user.full_name }}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                     <li><h6 class="dropdown-header">Account</h6></li>
@@ -563,13 +1357,18 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container-fluid py-4">
+    <div class="container-fluid py-4 main-content">
         <div class="row">
             <!-- Main Content Area -->
             <div class="col-lg-10 mx-auto">
                 {% if user %}
                 <!-- Hero Section -->
                 <div class="hero-section">
+                    <div class="floating-shapes">
+                        <div class="shape shape-1"></div>
+                        <div class="shape shape-2"></div>
+                        <div class="shape shape-3"></div>
+                    </div>
                     <div class="hero-content">
                         <h1 class="hero-title">Transform Your Documents with AI</h1>
                         <p class="hero-subtitle">Digitize, extract, and organize your documents with our powerful AI technology. Fast, accurate, and secure.</p>
@@ -586,20 +1385,20 @@
 
                 <!-- Stats Section -->
                 <div class="row mb-5">
-                    <div class="col-md-4 mb-4">
-                        <div class="stats-card">
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="stats-card h-100 hover-glow">
                             <div class="number" id="totalConversions">0</div>
                             <div class="label">Total Conversions</div>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="stats-card">
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="stats-card h-100 hover-glow">
                             <div class="number" id="successfulConversions">0</div>
                             <div class="label">Successful</div>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="stats-card">
+                    <div class="col-lg-4 col-md-12 mb-4">
+                        <div class="stats-card h-100 hover-glow">
                             <div class="number" id="thisMonthConversions">0</div>
                             <div class="label">This Month</div>
                         </div>
@@ -609,8 +1408,8 @@
                 <!-- Features Section -->
                 <div class="row mb-5" id="features">
                     <h2 class="section-title">Powerful <span>Features</span></h2>
-                    <div class="col-md-4 mb-4">
-                        <div class="feature-card">
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="feature-card h-100">
                             <div class="feature-icon">
                                 <i class="bi bi-lightning-charge"></i>
                             </div>
@@ -618,8 +1417,8 @@
                             <p class="feature-desc">Process documents in seconds with our optimized AI algorithms.</p>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="feature-card">
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="feature-card h-100">
                             <div class="feature-icon">
                                 <i class="bi bi-shield-lock"></i>
                             </div>
@@ -627,8 +1426,8 @@
                             <p class="feature-desc">Your documents are encrypted and never stored on our servers.</p>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="feature-card">
+                    <div class="col-lg-4 col-md-12 mb-4">
+                        <div class="feature-card h-100">
                             <div class="feature-icon">
                                 <i class="bi bi-robot"></i>
                             </div>
@@ -639,8 +1438,8 @@
                 </div>
 
                 <!-- Upload Section -->
-                <div class="card mb-5" id="upload-section">
-                    <div class="card-body p-4">
+                <div class="enhanced-card mb-5" id="upload-section">
+                    <div class="enhanced-card-body">
                         <!-- Model Selector moved inside card body -->
                         <div class="model-selector position-absolute top-0 end-0 mt-3 me-3">
                             <div class="dropdown">
@@ -656,7 +1455,7 @@
                             </div>
                         </div>
                         
-                        <h5 class="card-title mb-4"><i class="bi bi-cloud-arrow-up-fill me-2"></i>Upload Document</h5>
+                        <h5 class="enhanced-card-title"><i class="bi bi-cloud-arrow-up-fill"></i>Upload Document</h5>
                         
                         <!-- Alert for model selection -->
                         <div class="alert alert-info mb-4">
@@ -679,7 +1478,7 @@
                         <!-- Preview Section (hidden by default) -->
                         <div class="mt-4 d-none" id="previewSection">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-6 mb-4 mb-md-0">
                                     <h6 class="mb-3">Original Document</h6>
                                     <img src="" alt="Document Preview" class="img-fluid file-preview" id="originalPreview">
                                     <div class="text-center mt-2">
@@ -720,11 +1519,110 @@
                     </div>
                 </div>
 
+                <!-- Testimonials Section -->
+                <div class="row mb-5">
+                    <h2 class="section-title">What Our <span>Users Say</span></h2>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="testimonial-card">
+                            <div class="testimonial-text">
+                                "DocumentorAI has completely transformed how I handle paperwork. The accuracy is incredible and it saves me hours every week!"
+                            </div>
+                            <div class="testimonial-author">
+                                <img src="https://ui-avatars.com/api/?name=Sarah+Johnson&background=4361ee&color=fff" alt="Sarah Johnson" class="author-avatar">
+                                <div class="author-info">
+                                    <h6>Sarah Johnson</h6>
+                                    <small>Marketing Director</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="testimonial-card">
+                            <div class="testimonial-text">
+                                "As a researcher, I process hundreds of documents monthly. This tool has become indispensable for my workflow."
+                            </div>
+                            <div class="testimonial-author">
+                                <img src="https://ui-avatars.com/api/?name=Michael+Chen&background=3a0ca3&color=fff" alt="Michael Chen" class="author-avatar">
+                                <div class="author-info">
+                                    <h6>Michael Chen</h6>
+                                    <small>Research Scientist</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-12 mb-4">
+                        <div class="testimonial-card">
+                            <div class="testimonial-text">
+                                "The security features give me peace of mind knowing my sensitive documents are handled with care and never stored."
+                            </div>
+                            <div class="testimonial-author">
+                                <img src="https://ui-avatars.com/api/?name=Emma+Rodriguez&background=4cc9f0&color=fff" alt="Emma Rodriguez" class="author-avatar">
+                                <div class="author-info">
+                                    <h6>Emma Rodriguez</h6>
+                                    <small>Legal Consultant</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Section -->
+                <div class="row mb-5">
+                    <h2 class="section-title">Frequently Asked <span>Questions</span></h2>
+                    <div class="col-lg-8 mx-auto">
+                        <div class="faq-item">
+                            <div class="faq-question" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                What file formats are supported?
+                                <i class="bi bi-chevron-down faq-toggle"></i>
+                            </div>
+                            <div class="faq-answer collapse" id="faq1">
+                                <p>We currently support image formats including JPG, PNG, GIF, and BMP. PDF support is coming soon!</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                How secure is my data?
+                                <i class="bi bi-chevron-down faq-toggle"></i>
+                            </div>
+                            <div class="faq-answer collapse" id="faq2">
+                                <p>Your documents are encrypted during processing and are never stored on our servers. They are automatically deleted after processing for maximum security.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                How accurate is the text extraction?
+                                <i class="bi bi-chevron-down faq-toggle"></i>
+                            </div>
+                            <div class="faq-answer collapse" id="faq3">
+                                <p>Our AI models achieve over 95% accuracy on standard documents. Accuracy may vary based on image quality, fonts, and document complexity.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                Is there a limit to how many documents I can process?
+                                <i class="bi bi-chevron-down faq-toggle"></i>
+                            </div>
+                            <div class="faq-answer collapse" id="faq4">
+                                <p>Free accounts can process up to 50 documents per month. Premium accounts have higher limits based on their subscription tier.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA Section -->
+                <div class="cta-section">
+                    <h2 class="mb-3">Ready to Transform Your Documents?</h2>
+                    <p class="mb-4">Join thousands of users who have already digitized their paperwork with DocumentorAI</p>
+                    <a href="#upload-section" class="btn btn-cta">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Get Started Now
+                    </a>
+                </div>
+
                 <!-- Conversion History -->
-                <div class="card">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="card-title mb-0"><i class="bi bi-clock-history me-2"></i>Recent Conversions</h5>
+                <div class="enhanced-card">
+                    <div class="enhanced-card-body">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                            <h5 class="enhanced-card-title mb-0"><i class="bi bi-clock-history"></i>Recent Conversions</h5>
                             <button class="btn btn-sm btn-outline-secondary" id="refreshHistoryBtn">
                                 <i class="bi bi-arrow-clockwise me-1"></i>Refresh
                             </button>
@@ -742,7 +1640,7 @@
                         <!-- Pagination Controls -->
                         <div id="paginationContainer" class="d-none">
                             <nav aria-label="History pagination">
-                                <ul class="pagination justify-content-center mb-0" id="historyPagination">
+                                <ul class="pagination justify-content-center mb-0 flex-wrap" id="historyPagination">
                                     <!-- Pagination items will be dynamically generated -->
                                 </ul>
                             </nav>
@@ -767,9 +1665,66 @@
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5>DocumentorAI</h5>
+                    <p>Transform your physical documents into searchable digital text with our advanced AI technology.</p>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+                    <h5>Product</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">Pricing</a></li>
+                        <li><a href="#">Use Cases</a></li>
+                        <li><a href="#">API</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+                    <h5>Resources</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Tutorials</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+                    <h5>Company</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Partners</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+                    <h5>Legal</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                        <li><a href="#">GDPR</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 DocumentorAI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
     <!-- History Item Modal -->
     <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="historyModalLabel">Conversion Details</h5>
@@ -784,8 +1739,8 @@
                             <p class="mb-1"><strong>Processing Time:</strong> <span id="modalProcessingTime">-</span></p>
                             <p class="mb-1"><strong>Status:</strong> <span id="modalStatus">-</span></p>
                         </div>
-                        <div class="col-md-4 text-end">
-                            <button class="btn btn-primary" id="downloadDetailsBtn">
+                        <div class="col-md-4 text-md-end text-start mt-3 mt-md-0">
+                            <button class="btn btn-primary w-100 w-md-auto" id="downloadDetailsBtn">
                                 <i class="bi bi-download me-2"></i>Download
                             </button>
                         </div>
@@ -818,6 +1773,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadConversionHistory();
             loadUserStats();
+
+            // Add event listeners for FAQ toggles
+            document.querySelectorAll('.faq-question').forEach(question => {
+                question.addEventListener('click', function() {
+                    const toggle = this.querySelector('.faq-toggle');
+                    toggle.classList.toggle('rotate');
+                });
+            });
         });
 
         // Basic file upload preview functionality
