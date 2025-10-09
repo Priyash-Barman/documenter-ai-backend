@@ -113,38 +113,24 @@ class GeminiAIService:
                 font = ImageFont.load_default()
                 title_font = ImageFont.load_default()
             
-            header_text = "DIGITIZED DOCUMENT"
-            header_bbox = draw.textbbox((0, 0), header_text, font=title_font)
-            header_width = header_bbox[2] - header_bbox[0]
-            header_x = (width - header_width) // 2
-            
-            draw.text((header_x, 30), header_text, fill='#2c3e50', font=title_font)
-            
-            draw.line([(50, 70), (width-50, 70)], fill='#bdc3c7', width=2)
-            
-            info_text = "Processed with Google Gemini"
-            draw.text((50, 80), info_text, fill='#7f8c8d', font=font)
-            
-            y_position = 120
-            line_height = 30
+            # Remove the extra UI elements and only show the digitized text
             margin_left = 50
             margin_right = 50
+            margin_top = 50  # Reduced top margin
             max_width = width - margin_left - margin_right
+            
+            y_position = margin_top
+            line_height = 30
             
             lines = self._split_text_to_lines(text, font, max_width, draw)
             
             for line in lines:
-                if y_position + line_height > height - 80:  
-
+                if y_position + line_height > height - 50:  # Reduced bottom margin
                     draw.text((margin_left, y_position), "... (text continues)", fill='#7f8c8d', font=font)
                     break
                 
                 draw.text((margin_left, y_position), line, fill='#2c3e50', font=font)
                 y_position += line_height
-            
-            footer_y = height - 50
-            footer_text = f"Generated on: {self._get_current_datetime()} | Lines: {len(lines)}"
-            draw.text((50, footer_y), footer_text, fill='#95a5a6', font=font)
             
             logger.info(f"Created digitized document with {len(lines)} lines")
             return image
