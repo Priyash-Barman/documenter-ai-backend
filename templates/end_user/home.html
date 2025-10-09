@@ -53,6 +53,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             transition: transform 0.2s, box-shadow 0.2s;
+            position: relative; /* Needed for absolute positioning of model selector */
         }
 
         .card:hover {
@@ -100,6 +101,7 @@
             font-weight: 500;
         }
 
+        /* Updated model selector styles */
         .model-selector .dropdown-toggle {
             background-color: white;
             color: var(--dark-color);
@@ -107,10 +109,89 @@
             padding: 0.5rem 1rem;
             border-radius: 8px;
             font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
         }
 
         .model-selector .dropdown-toggle:hover {
             background-color: #f9fafb;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .model-selector .dropdown-toggle:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
+        }
+
+        /* Improved dropdown menu styles */
+        .model-selector .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            padding: 0.5rem;
+            min-width: 200px;
+            transform-origin: top right;
+            animation: dropdownAnimation 0.3s ease;
+        }
+
+        @keyframes dropdownAnimation {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .model-selector .dropdown-header {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .model-selector .dropdown-item {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin: 0.25rem 0;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .model-selector .dropdown-item:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+        }
+
+        .model-selector .dropdown-item.active {
+            background-color: rgba(67, 97, 238, 0.15);
+            color: var(--primary-color);
+        }
+
+        .model-selector .dropdown-item i {
+            width: 20px;
+            text-align: center;
+            margin-right: 8px;
+        }
+
+        .model-selector .dropdown-divider {
+            margin: 0.5rem 0;
+            border-color: #e9ecef;
+        }
+
+        .model-selector .text-muted {
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            margin: 0.25rem 0;
+            color: #6c757d;
+            font-style: italic;
         }
 
         .file-preview {
@@ -188,29 +269,11 @@
     <!-- Header/Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container-fluid">
-            <!-- Left side - Brand and Model Selector -->
+            <!-- Left side - Brand -->
             <div class="d-flex align-items-center">
                 <a class="navbar-brand me-4" href="#">
                     <i class="bi bi-file-earmark-text-fill me-2"></i>DocumentorAI
                 </a>
-
-                {% if user %}
-                <div class="model-selector me-3">
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" type="button" id="modelDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-selected-model="gemini">
-                            <i class="bi bi-robot me-2"></i>Available Models
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="modelDropdown">
-                            <li><h6 class="dropdown-header">AI Models</h6></li>
-                            <li><a class="dropdown-item active" href="#" data-value="gemini">
-                                <i class="bi bi-google me-2"></i>Gemini
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><small class="px-3 text-muted">More models coming soon...</small></li>
-                        </ul>
-                    </div>
-                </div>
-                {% endif %}
             </div>
 
             <!-- Right side - User Profile -->
@@ -250,6 +313,21 @@
                 <!-- Upload Section -->
                 <div class="card mb-4">
                     <div class="card-body p-4">
+                        <!-- Model Selector moved inside card body -->
+                        <div class="model-selector position-absolute top-0 end-0 mt-3 me-3">
+                            <div class="dropdown">
+                                <button class="btn dropdown-toggle" type="button" id="modelDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-selected-model="gemini">
+                                    <i class="bi bi-robot me-2"></i>Available Models
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="modelDropdown">
+                                    <li><h6 class="dropdown-header">AI Models</h6></li>
+                                    <li><a class="dropdown-item active" href="#" data-value="gemini">
+                                        <i class="bi bi-google me-2"></i>Gemini
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
                         <h5 class="card-title mb-4"><i class="bi bi-cloud-arrow-up-fill me-2"></i>Upload Document</h5>
                         
                         <!-- Alert for model selection -->
