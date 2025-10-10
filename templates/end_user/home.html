@@ -294,6 +294,9 @@
             border-radius: 12px;
             font-weight: 600;
             transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-outline-primary:hover {
@@ -932,6 +935,17 @@
             font-style: italic;
             color: #555;
             margin-bottom: 1rem;
+            overflow-y: auto;
+            max-height: 80px;
+            padding-right: 10px;
+            /* Hide scrollbar for Chrome, Safari and Opera */
+            scrollbar-width: none; /* For Firefox */
+            -ms-overflow-style: none; /* For Internet Explorer and Edge */
+        }
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .testimonial-text::-webkit-scrollbar {
+            display: none;
         }
 
         .testimonial-author {
@@ -1318,6 +1332,7 @@
     </style>
 </head>
 <body>
+
     <!-- Header/Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container-fluid">
@@ -1331,9 +1346,8 @@
             <!-- Right side - User Profile -->
             {% if user %}
             <div class="dropdown">
-                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <a href="#" class="d-flex align-items-center text-decoration-none" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     <img src="https://ui-avatars.com/api/?name={{ user.full_name }}&background=4361ee&color=fff" alt="User" class="user-avatar">
-                    <span class="d-none d-md-inline ms-2">{{ user.full_name }}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                     <li><h6 class="dropdown-header">Account</h6></li>
@@ -1444,7 +1458,7 @@
                         <div class="model-selector position-absolute top-0 end-0 mt-3 me-3">
                             <div class="dropdown">
                                 <button class="btn dropdown-toggle" type="button" id="modelDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-selected-model="gemini">
-                                    <i class="bi bi-robot me-2"></i>Available Models
+                                    <i class="bi bi-robot me-2"></i>Models
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="modelDropdown">
                                     <li><h6 class="dropdown-header">AI Models</h6></li>
