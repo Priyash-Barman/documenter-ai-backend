@@ -169,10 +169,6 @@
             opacity: 0.8;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
 
         .card-header {
             background: transparent;
@@ -338,52 +334,6 @@
         }
 
         /* Model selector styles */
-        .model-selector .dropdown-toggle {
-            background-color: white;
-            color: var(--dark-color);
-            border: 1px solid #e5e7eb;
-            padding: 0.6rem 1.2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: var(--transition);
-        }
-
-        .model-selector .dropdown-toggle:hover {
-            background-color: #f9fafb;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .model-selector .dropdown-toggle:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
-        }
-
-        .model-selector .dropdown-menu {
-            border: none;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            border-radius: 12px;
-            padding: 0.5rem;
-            min-width: 220px;
-        }
-
-        .model-selector .dropdown-item {
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            margin: 0.25rem 0;
-            transition: var(--transition);
-            font-weight: 500;
-        }
-
-        .model-selector .dropdown-item:hover {
-            background-color: rgba(67, 97, 238, 0.1);
-            color: var(--primary-color);
-        }
-
-        .model-selector .dropdown-item.active {
-            background-color: rgba(67, 97, 238, 0.15);
-            color: var(--primary-color);
-        }
 
         .file-preview {
             max-height: 200px;
@@ -488,9 +438,6 @@
             background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
         }
 
-        .stats-card:hover {
-            transform: translateY(-5px);
-        }
 
         .stats-card .number {
             font-size: 2rem;
@@ -537,10 +484,6 @@
             border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(67, 97, 238, 0.15);
-        }
 
         .feature-card::after {
             content: "";
@@ -555,9 +498,6 @@
             transition: transform 0.3s ease;
         }
 
-        .feature-card:hover::after {
-            transform: scaleX(1);
-        }
 
         .feature-icon {
             width: 70px;
@@ -1197,10 +1137,6 @@
             margin-bottom: 1.5rem;
         }
 
-        .enhanced-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.1);
-        }
 
         .enhanced-card::before {
             content: "";
@@ -1454,28 +1390,7 @@
                 <!-- Upload Section -->
                 <div class="enhanced-card mb-5" id="upload-section">
                     <div class="enhanced-card-body">
-                        <!-- Model Selector moved inside card body -->
-                        <div class="model-selector position-absolute top-0 end-0 mt-3 me-3">
-                            <div class="dropdown">
-                                <button class="btn dropdown-toggle" type="button" id="modelDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-selected-model="gemini">
-                                    <i class="bi bi-robot me-2"></i>Models
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="modelDropdown">
-                                    <li><h6 class="dropdown-header">AI Models</h6></li>
-                                    <li><a class="dropdown-item active" href="#" data-value="gemini">
-                                        <i class="bi bi-google me-2"></i>Gemini
-                                    </a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        
                         <h5 class="enhanced-card-title"><i class="bi bi-cloud-arrow-up-fill"></i>Upload Document</h5>
-                        
-                        <!-- Alert for model selection -->
-                        <div class="alert alert-info mb-4">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>Note:</strong> Currently, only Gemini is available for document digitization. Make sure Gemini is selected from the dropdown above.
-                        </div>
 
                         <div class="upload-area" id="uploadArea">
                             <div class="mb-3">
@@ -2271,25 +2186,7 @@
             document.getElementById('documentUpload').dispatchEvent(event);
         }
 
-        // Model dropdown selection (though only Gemini is available)
-        document.querySelectorAll('.model-selector .dropdown-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                const modelName = this.textContent.trim();
-                const modelValue = this.dataset.value;
-                const dropdownButton = document.getElementById('modelDropdown');
-                
-                // Remove active class from all and add to clicked
-                document.querySelectorAll('.model-selector .dropdown-item').forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-                
-                dropdownButton.innerHTML = `<i class="bi bi-robot me-2"></i>${modelName}`;
-                dropdownButton.dataset.selectedModel = modelValue;
-                
-                // Show alert when model is changed
-                showAlert(`Model changed to ${modelName}`, 'info');
-            });
-        });
+        // Model selector JS removed
 
         // Utility function to show alerts
         function showAlert(message, type = 'info') {
