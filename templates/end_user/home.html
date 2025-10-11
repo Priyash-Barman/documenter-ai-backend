@@ -132,8 +132,27 @@
 
                 <!-- Upload Section -->
                 <div class="enhanced-card mb-5" id="upload-section">
-                    <div class="enhanced-card-body">
+                    <div class="enhanced-card-body position-relative">
                         <h5 class="enhanced-card-title"><i class="bi bi-cloud-arrow-up-fill"></i>Upload Document</h5>
+
+                        <!-- Custom Model Dropdown -->
+                        <div class="model-dropdown-container">
+                            <div class="model-dropdown" id="modelDropdown">
+                                <button class="model-dropdown-toggle" id="modelDropdownToggle">
+                                    <span id="selectedModel">Select model</span>
+                                    <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+                                </button>
+                                <div class="model-dropdown-menu" id="modelDropdownMenu">
+                                    <div class="model-dropdown-item selected">
+                                        <img src="static/img/Google_Favicon_2025.svg" alt="Gemini" class="model-icon">
+                                        gemini-2.5-flash
+                                    </div>
+                                    <div class="model-dropdown-item coming-soon" tabindex="-1">
+                                        <span class="coming-soon-label">more models are coming soon</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="upload-area" id="uploadArea">
                             <div class="mb-3">
@@ -436,5 +455,180 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="static/js/home.js"></script>
+    <style>
+    /* Model Dropdown Styles */
+    .model-dropdown-container {
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        z-index: 10;
+    }
+    .model-dropdown {
+        position: relative;
+        min-width: 160px;
+        font-family: 'Inter', sans-serif;
+    }
+    .model-dropdown-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        outline: none;
+        width: 100%;
+    }
+    .model-dropdown-toggle:hover {
+        border-color: #d1d5db;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+    .model-dropdown-toggle:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    }
+    .model-icon {
+        width: 18px;
+        height: 18px;
+    }
+    .dropdown-arrow {
+        margin-left: auto;
+        transition: transform 0.2s ease;
+        width: 14px;
+        height: 14px;
+    }
+    .model-dropdown.open .dropdown-arrow {
+        transform: rotate(180deg);
+    }
+    .model-dropdown-menu {
+        display: none;
+        position: absolute;
+        top: calc(100% + 0.25rem);
+        right: 0;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        min-width: 190px;
+        padding: 0.4rem 0;
+        z-index: 100;
+        animation: dropdownAnimation 0.2s ease;
+    }
+    @keyframes dropdownAnimation {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .model-dropdown.open .model-dropdown-menu {
+        display: block;
+    }
+    .model-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .model-dropdown-item.selected {
+        background: #f1f5ff;
+        color: #4361ee;
+        font-weight: 500;
+        border-radius: 6px;
+        margin: 0 0.4rem;
+    }
+    .model-dropdown-item:not(.selected):hover {
+        background: #f9fafb;
+    }
+    .model-dropdown-item.coming-soon {
+        color: #9ca3af;
+        font-size: 0.85rem;
+        cursor: not-allowed;
+        background: none;
+        font-style: italic;
+        padding-left: 2.2rem;
+    }
+    .coming-soon-label {
+        opacity: 0.8;
+    }
+    @media (max-width: 600px) {
+        .model-dropdown-container {
+            right: 1rem;
+            top: 0.75rem;
+        }
+        .model-dropdown {
+            min-width: 140px;
+        }
+        .model-dropdown-menu {
+            min-width: 160px;
+        }
+    }
+</style>
+    <script>
+    // Model Dropdown JS (no Bootstrap)
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdown = document.getElementById('modelDropdown');
+        const toggle = document.getElementById('modelDropdownToggle');
+        const menu = document.getElementById('modelDropdownMenu');
+        const selectedModel = document.getElementById('selectedModel');
+        let isOpen = false;
+
+        function openDropdown() {
+            dropdown.classList.add('open');
+            isOpen = true;
+        }
+        function closeDropdown() {
+            dropdown.classList.remove('open');
+            isOpen = false;
+        }
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            isOpen ? closeDropdown() : openDropdown();
+        });
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target)) closeDropdown();
+        });
+        // Keyboard accessibility
+        toggle.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                isOpen ? closeDropdown() : openDropdown();
+            }
+        });
+
+        // Make dropdown item selectable
+        const modelItems = menu.querySelectorAll('.model-dropdown-item:not(.coming-soon)');
+        modelItems.forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // Remove selected from all
+                modelItems.forEach(i => i.classList.remove('selected'));
+                // Add selected to clicked
+                item.classList.add('selected');
+                // Update button label with icon and text
+                const itemContent = item.cloneNode(true);
+                // Remove coming soon elements if any
+                const comingSoonElements = itemContent.querySelectorAll('.coming-soon-label');
+                comingSoonElements.forEach(el => el.remove());
+                selectedModel.innerHTML = itemContent.innerHTML;
+                closeDropdown();
+            });
+            // Keyboard accessibility for items
+            item.setAttribute('tabindex', '0');
+            item.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    item.click();
+                }
+            });
+        });
+    });
+    </script>
 </body>
 </html>
