@@ -254,12 +254,7 @@
                     // Only allow numbers
                     this.value = this.value.replace(/\D/g, '');
                     
-                    // Auto-submit when 6 digits entered
-                    if (this.value.length === 6) {
-                        setTimeout(() => {
-                            document.getElementById('otpForm').submit();
-                        }, 500);
-                    }
+                    // User must now click the Verify Code button explicitly
                 });
 
                 // Focus on OTP input

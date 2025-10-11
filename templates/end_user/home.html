@@ -498,7 +498,7 @@
     }
     .dropdown-arrow {
         margin-left: auto;
-        transition: transform 0.2s ease;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         width: 14px;
         height: 14px;
     }
@@ -506,7 +506,6 @@
         transform: rotate(180deg);
     }
     .model-dropdown-menu {
-        display: none;
         position: absolute;
         top: calc(100% + 0.25rem);
         right: 0;
@@ -517,14 +516,16 @@
         min-width: 190px;
         padding: 0.4rem 0;
         z-index: 100;
-        animation: dropdownAnimation 0.2s ease;
-    }
-    @keyframes dropdownAnimation {
-        from { opacity: 0; transform: translateY(-6px); }
-        to { opacity: 1; transform: translateY(0); }
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px) scale(0.95);
+        transform-origin: top right;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .model-dropdown.open .model-dropdown-menu {
-        display: block;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0) scale(1);
     }
     .model-dropdown-item {
         display: flex;
@@ -569,6 +570,37 @@
             min-width: 160px;
         }
     }
+    
+    /* Enhanced dropdown styles */
+    .model-dropdown-toggle:focus-visible {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.25);
+    }
+    
+    .model-dropdown-item:focus-visible {
+        outline: 2px solid #4361ee;
+        outline-offset: -2px;
+        border-radius: 6px;
+        margin: 0 0.4rem;
+    }
+    
+    /* Improved hover states */
+    .model-dropdown-item:not(.coming-soon):active {
+        background: #e5e7ef;
+        transform: scale(0.98);
+    }
+    
+    /* Better spacing for icons */
+    .model-dropdown-item .model-icon {
+        flex-shrink: 0;
+    }
+    
+    /* Enhanced disabled state */
+    .model-dropdown-item.coming-soon::after {
+        content: "•";
+        margin-left: auto;
+        color: #d1d5db;
+    }
 </style>
     <script>
     // Model Dropdown JS (no Bootstrap)
@@ -582,10 +614,14 @@
         function openDropdown() {
             dropdown.classList.add('open');
             isOpen = true;
+            // Add aria-expanded attribute for accessibility
+            toggle.setAttribute('aria-expanded', 'true');
         }
         function closeDropdown() {
             dropdown.classList.remove('open');
             isOpen = false;
+            // Add aria-expanded attribute for accessibility
+            toggle.setAttribute('aria-expanded', 'false');
         }
         toggle.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -599,6 +635,9 @@
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 isOpen ? closeDropdown() : openDropdown();
+            } else if (e.key === 'Escape' && isOpen) {
+                closeDropdown();
+                toggle.focus();
             }
         });
 
@@ -618,6 +657,8 @@
                 comingSoonElements.forEach(el => el.remove());
                 selectedModel.innerHTML = itemContent.innerHTML;
                 closeDropdown();
+                // Move focus back to toggle for better UX
+                toggle.focus();
             });
             // Keyboard accessibility for items
             item.setAttribute('tabindex', '0');
@@ -625,10 +666,21 @@
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     item.click();
+                } else if (e.key === 'Escape') {
+                    closeDropdown();
+                    toggle.focus();
                 }
             });
+            
+            // Add aria roles for accessibility
+            item.setAttribute('role', 'menuitem');
         });
+        
+        // Add aria attributes for accessibility
+        toggle.setAttribute('aria-haspopup', 'true');
+        toggle.setAttribute('aria-expanded', 'false');
+        menu.setAttribute('role', 'menu');
     });
-    </script>
+</script>
 </body>
 </html>
