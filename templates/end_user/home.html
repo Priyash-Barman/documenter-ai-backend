@@ -17,7 +17,7 @@
         <div class="container-fluid">
             <!-- Left side - Brand -->
             <div class="d-flex align-items-center">
-                <a class="navbar-brand me-4" href="#">
+                <a class="navbar-brand me-4" href="/">
                     <i class="bi bi-file-earmark-text-fill me-2"></i>DocumentorAI
                 </a>
             </div>
@@ -143,12 +143,17 @@
                                     <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
                                 </button>
                                 <div class="model-dropdown-menu" id="modelDropdownMenu">
-                                    <div class="model-dropdown-item selected">
+                                    <div class="model-dropdown-item selected" data-model="gemini-flash">
                                         <img src="static/img/Google_Favicon_2025.svg" alt="Gemini" class="model-icon">
                                         gemini-2.5-flash
                                     </div>
-                                    <div class="model-dropdown-item coming-soon" tabindex="-1">
-                                        <span class="coming-soon-label">more models are coming soon</span>
+                                    <div class="model-dropdown-item" data-model="gemini-flash-lite">
+                                        <img src="static/img/Google_Favicon_2025.svg" alt="Gemini" class="model-icon">
+                                        gemini-2.5-flash-lite
+                                    </div>
+                                    <div class="model-dropdown-item" data-model="gemini-pro">
+                                        <img src="static/img/Google_Favicon_2025.svg" alt="Gemini" class="model-icon">
+                                        gemini-2.5-pro
                                     </div>
                                 </div>
                             </div>
@@ -651,11 +656,8 @@
                 // Add selected to clicked
                 item.classList.add('selected');
                 // Update button label with icon and text
-                const itemContent = item.cloneNode(true);
-                // Remove coming soon elements if any
-                const comingSoonElements = itemContent.querySelectorAll('.coming-soon-label');
-                comingSoonElements.forEach(el => el.remove());
-                selectedModel.innerHTML = itemContent.innerHTML;
+                const itemText = item.textContent.trim();
+                selectedModel.textContent = itemText;
                 closeDropdown();
                 // Move focus back to toggle for better UX
                 toggle.focus();

@@ -9,12 +9,39 @@ from utils.logger import logger
 import config
 
 class GeminiAIService:
-    def __init__(self):
-        """Initialize Gemini service with API key"""
+    # Define supported models with their capabilities
+    SUPPORTED_MODELS = {
+        'gemini-2.5-flash': {
+            'name': 'Gemini 2.5 Flash',
+            'description': 'Fast and efficient model for document processing',
+            'free_tier': True,
+            'timeout': 120  # 2 minutes
+        },
+        'gemini-2.5-flash-lite': {
+            'name': 'Gemini 2.5 Flash Lite',
+            'description': 'Cost-effective model optimized for high throughput',
+            'free_tier': True,
+            'timeout': 120  # 2 minutes
+        },
+        'gemini-2.5-pro': {
+            'name': 'Gemini 2.5 Pro',
+            'description': 'Advanced model for complex reasoning and analysis',
+            'free_tier': True,  # Free tier available with limits
+            'timeout': 300  # 5 minutes for the more complex model
+        }
+    }
+    
+    def __init__(self, model_name: str = 'gemini-2.5-flash'):
+        """Initialize Gemini service with API key and specified model"""
         try:
             genai.configure(api_key=config.GEMINI_API_KEY)
-            self.model = genai.GenerativeModel('gemini-2.5-flash')
-            logger.info("Gemini service initialized successfully")
+            if model_name not in self.SUPPORTED_MODELS:
+                logger.warning(f"Model {model_name} not in supported models list. Using default.")
+                model_name = 'gemini-2.5-flash'
+            self.model = genai.GenerativeModel(model_name)
+            self.model_name = model_name
+            self.timeout = self.SUPPORTED_MODELS[model_name].get('timeout', 120)
+            logger.info(f"Gemini service initialized successfully with model: {model_name} (timeout: {self.timeout}s)")
         except Exception as e:
             logger.error(f"Error initializing Gemini service: {str(e)}")
             raise
@@ -26,7 +53,7 @@ class GeminiAIService:
         try:
             # Convert bytes to PIL Image
             image = Image.open(io.BytesIO(image_data))
-            logger.info(f"Processing image of size: {image.size}")
+            logger.info(f"Processing image of size: {image.size} with model: {self.model_name}")
             
             # Prompt for text extraction and digitization
             prompt = """
@@ -43,9 +70,39 @@ class GeminiAIService:
             If the image doesn't contain readable text, please describe what you see in the image instead.
             """
             
-            response = self.model.generate_content([prompt, image])
+            # Configure generation settings with timeout
+            generation_config = {
+                "temperature": 0.5,
+                "max_output_tokens": 8192,
+            }
+            
+            # Add safety settings to reduce blocking
+            safety_settings = [
+                {
+                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    "threshold": "BLOCK_ONLY_HIGH"
+                },
+                {
+                    "category": "HARM_CATEGORY_HARASSMENT",
+                    "threshold": "BLOCK_ONLY_HIGH"
+                },
+                {
+                    "category": "HARM_CATEGORY_HATE_SPEECH",
+                    "threshold": "BLOCK_ONLY_HIGH"
+                },
+                {
+                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    "threshold": "BLOCK_ONLY_HIGH"
+                }
+            ]
+            
+            response = self.model.generate_content(
+                [prompt, image], 
+                generation_config=generation_config,
+                safety_settings=safety_settings
+            )
             extracted_text = response.text
-            logger.info(f"Successfully extracted text: {len(extracted_text)} characters")
+            logger.info(f"Successfully extracted text: {len(extracted_text)} characters using {self.model_name}")
             
             digitized_image = self._create_digitized_document(extracted_text, image.size)
             
@@ -57,17 +114,31 @@ class GeminiAIService:
                 'success': True,
                 'extracted_text': extracted_text,
                 'digitized_image': digitized_bytes,
-                'original_size': image.size
+                'original_size': image.size,
+                'model_used': self.model_name
             }
             
         except Exception as e:
-            logger.error(f"Error in Gemini text extraction: {str(e)}")
-            return {
-                'success': False,
-                'error': str(e),
-                'extracted_text': '',
-                'digitized_image': image_data 
-            }
+            error_msg = str(e)
+            logger.error(f"Error in Gemini text extraction with {self.model_name}: {error_msg}")
+            
+            # Handle timeout specifically
+            if "timeout" in error_msg.lower() or "504" in error_msg:
+                return {
+                    'success': False,
+                    'error': f"Request timeout with {self.model_name}. This model may be taking longer than expected. Try using a faster model like 'gemini-2.5-flash' for quicker results.",
+                    'extracted_text': '',
+                    'digitized_image': image_data,
+                    'model_used': self.model_name
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': str(e),
+                    'extracted_text': '',
+                    'digitized_image': image_data,
+                    'model_used': self.model_name
+                }
     
     def _create_digitized_document(self, text: str, original_size: tuple) -> Image.Image:
         """
@@ -206,16 +277,58 @@ class GeminiAIService:
             Provide a detailed analysis in a structured format.
             """
             
-            response = self.model.generate_content([prompt, image])
+            # Configure generation settings with timeout
+            generation_config = {
+                "temperature": 0.5,
+                "max_output_tokens": 4096,
+            }
+            
+            # Add safety settings to reduce blocking
+            safety_settings = [
+                {
+                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    "threshold": "BLOCK_ONLY_HIGH"
+                },
+                {
+                    "category": "HARM_CATEGORY_HARASSMENT",
+                    "threshold": "BLOCK_ONLY_HIGH"
+                },
+                {
+                    "category": "HARM_CATEGORY_HATE_SPEECH",
+                    "threshold": "BLOCK_ONLY_HIGH"
+                },
+                {
+                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    "threshold": "BLOCK_ONLY_HIGH"
+                }
+            ]
+            
+            response = self.model.generate_content(
+                [prompt, image],
+                generation_config=generation_config,
+                safety_settings=safety_settings
+            )
             
             return {
                 'success': True,
-                'analysis': response.text
+                'analysis': response.text,
+                'model_used': self.model_name
             }
             
         except Exception as e:
-            logger.error(f"Error in document analysis: {str(e)}")
-            return {
-                'success': False,
-                'error': str(e)
-            }
+            error_msg = str(e)
+            logger.error(f"Error in document analysis with {self.model_name}: {error_msg}")
+            
+            # Handle timeout specifically
+            if "timeout" in error_msg.lower() or "504" in error_msg:
+                return {
+                    'success': False,
+                    'error': f"Request timeout with {self.model_name}. This model may be taking longer than expected. Try using a faster model like 'gemini-2.5-flash' for quicker results.",
+                    'model_used': self.model_name
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': str(e),
+                    'model_used': self.model_name
+                }

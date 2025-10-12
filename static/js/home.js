@@ -58,17 +58,22 @@
             const originalText = convertBtn.innerHTML;
             const fileInput = document.getElementById('documentUpload');
             const file = fileInput.files[0];
-            const selectedModel = document.getElementById('modelDropdown').dataset.selectedModel || 'gemini';
+            const selectedModelElement = document.querySelector('.model-dropdown-item.selected');
+            const selectedModel = selectedModelElement ? selectedModelElement.dataset.model : null;
             const progressContainer = document.getElementById('progressContainer');
             const progressBar = document.getElementById('progressBar');
 
+            // Validate file selection
             if (!file) {
                 showAlert('Please select a file first', 'warning');
                 return;
             }
 
-            if (selectedModel.toLowerCase() !== 'gemini') {
-                showAlert('Please select Gemini from the model dropdown', 'warning');
+            // Validate model selection
+            // Check if a model is actually selected (not just the default placeholder)
+            const selectedModelText = document.getElementById('selectedModel').textContent.trim();
+            if (!selectedModel || selectedModelText === 'Select model') {
+                showAlert('Please select an AI model before converting', 'warning');
                 return;
             }
 
@@ -76,8 +81,10 @@
             progressContainer.classList.remove('d-none');
             progressBar.style.width = '0%';
 
+            // Update button text based on selected model
+            const modelName = selectedModelElement ? selectedModelElement.textContent.trim() : 'AI Model';
             convertBtn.disabled = true;
-            convertBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing with Gemini...';
+            convertBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing with ${modelName}...`;
 
             try {
                 // Simulate progress
@@ -113,7 +120,7 @@
                     document.getElementById('downloadResultBtn').dataset.filename = result.filename;
                     document.getElementById('downloadResultBtn').dataset.imageData = result.digitized_image;
 
-                    showAlert('Document successfully digitized using Gemini!', 'success');
+                    showAlert(`Document successfully digitized using ${result.model_used || modelName}!`, 'success');
                     
                     // Refresh history and stats after successful conversion
                     setTimeout(() => {
@@ -121,12 +128,22 @@
                         loadUserStats(); // Refresh stats
                     }, 1000);
                 } else {
-                    showAlert(result.message || 'Conversion failed', 'danger');
+                    // Handle timeout errors specifically
+                    if (result.message && (result.message.includes('timeout') || result.message.includes('504'))) {
+                        showAlert(result.message, 'warning');
+                    } else {
+                        showAlert(result.message || 'Conversion failed', 'danger');
+                    }
                 }
 
             } catch (error) {
                 console.error('Conversion error:', error);
-                showAlert('Conversion failed. Please try again.', 'danger');
+                // Handle timeout errors specifically
+                if (error.message && (error.message.includes('timeout') || error.message.includes('504'))) {
+                    showAlert(`Request timeout with ${modelName}. This model may be taking longer than expected. Try using a faster model like 'gemini-2.5-flash' for quicker results.`, 'warning');
+                } else {
+                    showAlert('Conversion failed. Please try again.', 'danger');
+                }
             } finally {
                 convertBtn.disabled = false;
                 convertBtn.innerHTML = originalText;

@@ -45,11 +45,23 @@ async def convert(
     user = request.state.user
 
     try:
-
-        if model.lower() != "gemini":
+        # Check if model is provided
+        if not model or model.strip() == "":
             return {
                 "success": False,
-                "message": f"Model '{model}' is not currently supported. Please select Gemini.",
+                "message": "Please select an AI model before converting.",
+                "filename": image.filename,
+                "digitized_image": "",
+                "processing_time": time.time() - start_time,
+                "model_used": model
+            }
+
+        # Check if model is supported
+        supported_models = ["gemini", "gemini-flash", "gemini-flash-lite", "gemini-pro"]
+        if model.lower() not in supported_models:
+            return {
+                "success": False,
+                "message": f"Model '{model}' is not currently supported. Please select a valid model.",
                 "filename": image.filename,
                 "digitized_image": "",
                 "processing_time": time.time() - start_time,
@@ -66,7 +78,7 @@ async def convert(
 
         return {
             "success": True,
-            "message": "Conversion successful! Document has been digitized using Gemini.",
+            "message": f"Conversion successful! Document has been digitized using {model}.",
             "filename": image.filename,
             "digitized_image": image_base64,
             "processing_time": time.time() - start_time,
@@ -74,15 +86,34 @@ async def convert(
         }
 
     except Exception as e:
-        logger.error(f"Conversion error: {str(e)}")
-        return {
-            "success": False,
-            "message": f"Conversion failed: {str(e)}",
-            "filename": image.filename,
-            "digitized_image": "",
-            "processing_time": time.time() - start_time,
-            "model_used": model
-        }
+        error_msg = str(e)
+        logger.error(f"Conversion error: {error_msg}")
+        
+        # Handle timeout errors specifically
+        if "timeout" in error_msg.lower() or "504" in error_msg:
+            model_name = model
+            if model_name == "gemini-pro":
+                suggestion = "The Gemini 2.5 Pro model is more powerful but slower. Try using 'gemini-2.5-flash' for faster results."
+            else:
+                suggestion = "The request timed out. Please try again or use a different model."
+                
+            return {
+                "success": False,
+                "message": f"Request timeout with {model_name}. {suggestion}",
+                "filename": image.filename,
+                "digitized_image": "",
+                "processing_time": time.time() - start_time,
+                "model_used": model
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"Conversion failed: {error_msg}",
+                "filename": image.filename,
+                "digitized_image": "",
+                "processing_time": time.time() - start_time,
+                "model_used": model
+            }
 
 
 @router.get("/history")

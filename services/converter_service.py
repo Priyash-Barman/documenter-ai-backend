@@ -6,10 +6,19 @@ from .gemini_ai_service import GeminiAIService
 import asyncio
 
 class ConverterService:
+    # Supported models for conversion
+    SUPPORTED_MODELS = {
+        "gemini": "gemini-2.5-flash",
+        "gemini-flash": "gemini-2.5-flash",
+        "gemini-flash-lite": "gemini-2.5-flash-lite",
+        "gemini-pro": "gemini-2.5-pro"
+    }
+    
     def __init__(self, mongo):
         self.logs_collection = mongo["logs"]
         self.history_collection = mongo["conversion_history"]
         self.histories_collection = mongo["histories"]  # Add general history collection
+        # Initialize with default model
         self.gemini_service = GeminiAIService()
 
     async def convert_image(self, image_data: bytes, model: str, user_id: str = None, filename: str = None) -> bytes:
@@ -19,67 +28,75 @@ class ConverterService:
         conversion_id = ObjectId()
         start_time = datetime.utcnow()
         
+        # Normalize model name
+        normalized_model = self.SUPPORTED_MODELS.get(model.lower(), model.lower())
+        
         try:
-            await self._log_conversion_start(conversion_id, model, user_id, filename)
+            await self._log_conversion_start(conversion_id, normalized_model, user_id, filename)
             
-            if model.lower() == "gemini":
-                result = await self.gemini_service.digitize_handwritten_text(image_data)
+            # Check if it's a Gemini model
+            if normalized_model.startswith("gemini"):
+                # Initialize the service with the specific model
+                gemini_service = GeminiAIService(normalized_model)
+                result = await gemini_service.digitize_handwritten_text(image_data)
                 
                 if result['success']:
                     processed_image_data = result['digitized_image']
                     extracted_text = result.get('extracted_text', '')
+                    model_used = result.get('model_used', normalized_model)
                     
                     await self._save_conversion_history(
-                        conversion_id, user_id, filename, model, 
+                        conversion_id, user_id, filename, model_used, 
                         extracted_text, True, start_time
                     )
                     
                     # Also create entry in general history collection
                     await self._create_general_history(
-                        conversion_id, user_id, filename, model, extracted_text, True, start_time
+                        conversion_id, user_id, filename, model_used, extracted_text, True, start_time
                     )
                     
-                    logger.info(f"Gemini conversion successful for {filename}")
+                    logger.info(f"Gemini conversion successful for {filename} using {model_used}")
                     return processed_image_data
                 else:
+                    model_used = result.get('model_used', normalized_model)
                     await self._save_conversion_history(
-                        conversion_id, user_id, filename, model, 
+                        conversion_id, user_id, filename, model_used, 
                         f"Error: {result.get('error', 'Unknown error')}", False, start_time
                     )
                     
                     # Also create entry in general history collection
                     await self._create_general_history(
-                        conversion_id, user_id, filename, model, 
+                        conversion_id, user_id, filename, model_used, 
                         f"Error: {result.get('error', 'Unknown error')}", False, start_time
                     )
                     
-                    logger.error(f"Gemini conversion failed: {result.get('error')}")
+                    logger.error(f"Gemini conversion failed with {model_used}: {result.get('error')}")
                     return image_data
             else:
                 await self._save_conversion_history(
-                    conversion_id, user_id, filename, model, 
+                    conversion_id, user_id, filename, normalized_model, 
                     "Model not implemented", False, start_time
                 )
                 
                 # Also create entry in general history collection
                 await self._create_general_history(
-                    conversion_id, user_id, filename, model, 
+                    conversion_id, user_id, filename, normalized_model, 
                     "Model not implemented", False, start_time
                 )
                 
-                logger.warning(f"Model {model} not implemented, returning original image")
+                logger.warning(f"Model {normalized_model} not implemented, returning original image")
                 return image_data
                 
         except Exception as e:
             logger.error(f"Error in convert_image: {str(e)}")
             await self._save_conversion_history(
-                conversion_id, user_id, filename, model, 
+                conversion_id, user_id, filename, normalized_model, 
                 f"Exception: {str(e)}", False, start_time
             )
             
             # Also create entry in general history collection
             await self._create_general_history(
-                conversion_id, user_id, filename, model, 
+                conversion_id, user_id, filename, normalized_model, 
                 f"Exception: {str(e)}", False, start_time
             )
             
@@ -123,7 +140,7 @@ class ConverterService:
             }
             
             await self.history_collection.insert_one(history_entry)
-            logger.info(f"Saved conversion history for {filename}")
+            logger.info(f"Saved conversion history for {filename} using {model}")
             
         except Exception as e:
             logger.error(f"Error saving conversion history: {str(e)}")
@@ -156,7 +173,7 @@ class ConverterService:
             }
             
             await self.histories_collection.insert_one(general_history)
-            logger.info(f"Created general history entry for conversion {conversion_id}")
+            logger.info(f"Created general history entry for conversion {conversion_id} using {model}")
             
         except Exception as e:
             logger.error(f"Error creating general history: {str(e)}")
