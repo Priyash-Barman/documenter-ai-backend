@@ -45,12 +45,33 @@
                                     {% endif %}
 
                                     <div class="text-center mb-4">
-                                        <div class="profile-avatar">
-                                            <i class="fas fa-user-circle text-primary" style="font-size: 5rem;"></i>
+                                        <div class="profile-avatar position-relative d-inline-block">
+                                            {% if profile.profile_picture %}
+                                                <img id="previewImage" src="{{ profile.profile_picture }}" alt="Profile Picture" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                            {% else %}
+                                                <div id="previewPlaceholder" class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                                                    <i class="fas fa-user-circle text-primary" style="font-size: 5rem;"></i>
+                                                </div>
+                                                <img id="previewImage" src="" alt="Preview" class="rounded-circle d-none" style="width: 150px; height: 150px; object-fit: cover;">
+                                            {% endif %}
+                                            <div class="position-absolute bottom-0 end-0">
+                                                <label for="profile_picture" class="btn btn-primary btn-sm rounded-circle p-2 m-0" style="cursor: pointer;">
+                                                    <i class="fas fa-camera"></i>
+                                                </label>
+                                            </div>
                                         </div>
+                                        {% if profile.profile_picture %}
+                                            <div class="mt-2">
+                                                <button type="button" class="btn btn-sm btn-outline-danger" id="removePictureBtn">
+                                                    <i class="fas fa-trash me-1"></i>Remove Picture
+                                                </button>
+                                            </div>
+                                        {% endif %}
                                     </div>
 
-                                    <form method="post" action="/profile/update" id="profileForm">
+                                    <form method="post" action="/profile/update" id="profileForm" enctype="multipart/form-data">
+                                        <input type="file" id="profile_picture" name="profile_picture" accept="image/*" class="d-none">
+                                        
                                         <div class="mb-3">
                                             <label for="full_name" class="form-label">
                                                 <i class="fas fa-user me-2"></i>Full Name
@@ -139,6 +160,117 @@
                 }
             });
         }, 5000);
+
+        // Profile picture preview
+        document.getElementById('profile_picture').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Please select a valid image file (JPEG, PNG, or GIF)');
+                    e.target.value = ''; // Clear the input
+                    return;
+                }
+                
+                // Validate file size (5MB max)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size too large. Maximum allowed size is 5MB.');
+                    e.target.value = ''; // Clear the input
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const previewImage = document.getElementById('previewImage');
+                    const previewPlaceholder = document.getElementById('previewPlaceholder');
+                    
+                    previewImage.src = event.target.result;
+                    previewImage.classList.remove('d-none');
+                    if (previewPlaceholder) {
+                        previewPlaceholder.classList.add('d-none');
+                    }
+                    
+                    // Show remove button if it exists, or create it
+                    let removeBtn = document.getElementById('removePictureBtn');
+                    if (!removeBtn) {
+                        const container = document.querySelector('.profile-avatar');
+                        const removeBtnContainer = document.createElement('div');
+                        removeBtnContainer.className = 'mt-2';
+                        removeBtnContainer.innerHTML = `
+                            <button type="button" class="btn btn-sm btn-outline-danger" id="removePictureBtn">
+                                <i class="fas fa-trash me-1"></i>Remove Picture
+                            </button>
+                        `;
+                        container.parentNode.insertBefore(removeBtnContainer, container.nextSibling);
+                        removeBtn = document.getElementById('removePictureBtn');
+                        removeBtn.addEventListener('click', removeProfilePicture);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Remove profile picture function
+        function removeProfilePicture() {
+            if (confirm('Are you sure you want to remove your profile picture?')) {
+                fetch('/profile/remove-picture', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update UI to show default avatar
+                        const previewImage = document.getElementById('previewImage');
+                        const previewPlaceholder = document.getElementById('previewPlaceholder');
+                        
+                        if (previewPlaceholder) {
+                            previewPlaceholder.classList.remove('d-none');
+                        } else {
+                            // Create placeholder if it doesn't exist
+                            const container = document.querySelector('.profile-avatar');
+                            const placeholder = document.createElement('div');
+                            placeholder.id = 'previewPlaceholder';
+                            placeholder.className = 'bg-light rounded-circle d-flex align-items-center justify-content-center';
+                            placeholder.style = 'width: 150px; height: 150px;';
+                            placeholder.innerHTML = '<i class="fas fa-user-circle text-primary" style="font-size: 5rem;"></i>';
+                            container.innerHTML = '';
+                            container.appendChild(placeholder);
+                        }
+                        
+                        previewImage.classList.add('d-none');
+                        previewImage.src = '';
+                        
+                        // Remove the file input value
+                        document.getElementById('profile_picture').value = '';
+                        
+                        // Remove the remove button
+                        const removeBtn = document.getElementById('removePictureBtn');
+                        if (removeBtn) {
+                            removeBtn.closest('.mt-2').remove();
+                        }
+                        
+                        // Show success message
+                        alert('Profile picture removed successfully');
+                    } else {
+                        alert('Failed to remove profile picture: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while removing the profile picture');
+                });
+            }
+        }
+
+        // Attach event listener to remove button if it exists
+        const removePictureBtn = document.getElementById('removePictureBtn');
+        if (removePictureBtn) {
+            removePictureBtn.addEventListener('click', removeProfilePicture);
+        }
     </script>
 </body>
 </html>

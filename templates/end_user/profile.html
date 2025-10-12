@@ -45,8 +45,14 @@
                                     {% endif %}
 
                                     <div class="text-center mb-4">
-                                        <div class="profile-avatar">
-                                            <i class="fas fa-user-circle text-primary" style="font-size: 5rem;"></i>
+                                        <div class="profile-avatar position-relative d-inline-block">
+                                            {% if profile.profile_picture %}
+                                                <img src="{{ profile.profile_picture }}" alt="Profile Picture" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;" onerror="this.onerror=null;this.src='/static/img/default-avatar.png';">
+                                            {% else %}
+                                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                                                    <i class="fas fa-user-circle text-primary" style="font-size: 5rem;"></i>
+                                                </div>
+                                            {% endif %}
                                         </div>
                                     </div>
 

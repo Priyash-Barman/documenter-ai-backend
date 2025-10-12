@@ -25,6 +25,7 @@ class UserStatusUpdate(BaseModel):
 
 class UserProfileUpdate(BaseModel):
     full_name: Optional[str] = Field(None, min_length=2, max_length=100)
+    profile_picture: Optional[str] = None  # Add profile picture field
     # Add more profile fields as needed
     # phone: Optional[str] = None
     # bio: Optional[str] = None
@@ -32,5 +33,6 @@ class UserProfileUpdate(BaseModel):
 class UserInDB(UserBase):
     id: str = Field(..., alias="_id")
     is_active: bool
+    profile_picture: Optional[str] = None  # Add profile picture field
     created_at: datetime
     updated_at: datetime

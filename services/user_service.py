@@ -151,6 +151,48 @@ class UserService:
             return UserInDB(**updated_user)
         return None
 
+    async def update_profile_picture(self, user_id: str, profile_picture_path: str) -> Optional[UserInDB]:
+        """Update user's profile picture"""
+        update_data = {
+            "profile_picture": profile_picture_path,
+            "updated_at": datetime.utcnow()
+        }
+
+        result = await self.users_collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": update_data}
+        )
+
+        if result.modified_count == 0:
+            return None
+
+        updated_user = await self.users_collection.find_one({"_id": ObjectId(user_id)})
+        if updated_user:
+            updated_user["_id"] = str(updated_user["_id"])
+            return UserInDB(**updated_user)
+        return None
+
+    async def remove_profile_picture(self, user_id: str) -> Optional[UserInDB]:
+        """Remove user's profile picture"""
+        update_data = {
+            "profile_picture": None,
+            "updated_at": datetime.utcnow()
+        }
+
+        result = await self.users_collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": update_data}
+        )
+
+        if result.modified_count == 0:
+            return None
+
+        updated_user = await self.users_collection.find_one({"_id": ObjectId(user_id)})
+        if updated_user:
+            updated_user["_id"] = str(updated_user["_id"])
+            return UserInDB(**updated_user)
+        return None
+
     async def get_user_profile(self, user_id: str) -> Optional[UserInDB]:
         """Get user's profile by ID"""
         return await self.get_user_by_id(user_id)
