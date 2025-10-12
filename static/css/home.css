@@ -1117,15 +1117,13 @@
         /* Enhanced Card Body Styles */
         .enhanced-card {
             position: relative;
-            overflow: hidden;
-            border-radius: 16px;
-            background: var(--card-bg);
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            transition: all 0.3s ease;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eef2f7;
             margin-bottom: 1.5rem;
+            overflow: hidden;
         }
-
 
         .enhanced-card::before {
             content: "";
@@ -1133,36 +1131,21 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 5px;
+            height: 3px;
             background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
-            border-radius: 16px 16px 0 0;
         }
 
         .enhanced-card-body {
             padding: 1.75rem;
-            position: relative;
-        }
-
-        .enhanced-card-body::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="95" cy="5" r="0.8" fill="%234361ee" opacity="0.15"/><circle cx="5" cy="95" r="0.8" fill="%234361ee" opacity="0.15"/><circle cx="50" cy="50" r="0.8" fill="%234361ee" opacity="0.15"/></svg>');
-            background-size: 120px 120px;
-            z-index: -1;
-            opacity: 0.2;
         }
 
         .enhanced-card-title {
-            font-weight: 700;
-            color: var(--dark-color);
-            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1.25rem;
             position: relative;
             padding-bottom: 0.75rem;
-            font-size: 1.5rem;
+            font-size: 1.35rem;
         }
 
         .enhanced-card-title::after {
@@ -1170,31 +1153,28 @@
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 50px;
-            height: 3px;
+            width: 30px;
+            height: 2px;
             background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
-            border-radius: 3px;
+            border-radius: 1px;
         }
 
         .enhanced-card-title i {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--primary-color);
             margin-right: 0.5rem;
         }
 
         .card-divider {
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(67, 97, 238, 0.2), transparent);
+            background: #e2e8f0;
             margin: 1.5rem 0;
         }
 
         .card-highlight {
-            background: linear-gradient(135deg, rgba(67, 97, 238, 0.05), rgba(58, 12, 163, 0.05));
+            background: #f8fafc;
             border-radius: 12px;
             padding: 1.25rem;
-            border: 1px solid rgba(67, 97, 238, 0.1);
+            border: 1px solid #e2e8f0;
             margin: 1rem 0;
         }
 
@@ -1232,7 +1212,7 @@
             width: 40px;
             height: 40px;
             border-radius: 10px;
-            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(58, 12, 163, 0.1));
+            background: #f1f5f9;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1247,10 +1227,10 @@
         .card-stat-value {
             font-weight: 700;
             font-size: 1.25rem;
-            color: var(--dark-color);
+            color: #1e293b;
         }
 
         .card-stat-label {
             font-size: 0.85rem;
-            color: #6c757d;
+            color: #64748b;
         }
