@@ -18,7 +18,7 @@
             <!-- Left side - Brand -->
             <div class="d-flex align-items-center">
                 <a class="navbar-brand me-4" href="/">
-                    <i class="bi bi-file-earmark-text-fill me-2"></i>DocumentorAI
+                    DocumentorAI
                 </a>
             </div>
 
@@ -33,18 +33,12 @@
                     {% endif %}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                    <li><h6 class="dropdown-header">Account</h6></li>
                     <li><a class="dropdown-item" href="/profile"><i class="bi bi-person me-2"></i>Profile</a></li>
                     <li><a class="dropdown-item" href="#"><i class="bi bi-box me-2"></i>My Apps</a></li>
                     <li><a class="dropdown-item" href="#"><i class="bi bi-credit-card me-2"></i>Subscription</a></li>
                     <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><div class="px-3 py-1">
-                        <small class="text-muted">Logged in as</small>
-                        <div class="fw-bold">{{ user.email }}</div>
-                    </div></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    <li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Sign out</a></li>
                 </ul>
             </div>
             {% else %}
@@ -586,7 +580,6 @@
         height: 40px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid #ffffff;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     

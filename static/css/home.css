@@ -39,18 +39,21 @@
         }
 
         .navbar {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
-            padding: 0.8rem 2rem;
+            padding: 0.6rem 1.5rem;
             position: sticky;
             top: 0;
             z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             /* Added micro-interaction */
             transition: var(--transition);
         }
 
         .navbar:hover {
+            background: rgba(255, 255, 255, 0.25);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
         }
 
@@ -68,48 +71,61 @@
             transform: scale(1.02);
         }
 
-        .navbar-brand i {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-size: 1.8rem;
-        }
-
         .user-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             object-fit: cover;
             margin-right: 10px;
-            border: 2px solid var(--primary-color);
             box-shadow: var(--neon-glow);
             /* Added micro-interaction */
             transition: var(--micro-animation-duration);
         }
 
-        .user-avatar:hover {
-            transform: scale(1.1);
-        }
+        /* .user-avatar:hover {
+    transform: scale(1.1);
+} - Removed hover animation as per requirements */
 
         .dropdown-menu {
             border: none;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            border-radius: 12px;
+            border-radius: 18px;
             padding: 0.5rem;
-            transform-origin: top right;
-            animation: dropdownAnimation 0.3s ease;
+            /* transform-origin: top right; - Removed animation as per requirements */
+            /* animation: dropdownAnimation 0.3s ease; - Removed animation as per requirements */
+            min-width: 200px;
         }
 
-        @keyframes dropdownAnimation {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+        /* Specific styling for user avatar dropdown to create spacing from navbar */
+        .dropdown-menu[aria-labelledby="userDropdown"] {
+            top: 100% !important;
+            margin-top: 0.90rem !important; /* Creates a small gap between navbar and dropdown */
+        }
+
+        /* Ensure proper positioning of the user avatar dropdown container */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu .dropdown-item {
+            padding: 0.75rem 1rem;
+            color: #374151;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
+            margin: 0 0.25rem;
+        }
+
+        .dropdown-menu .dropdown-item:hover {
+            background-color: #e2e8f0;
+            color: #374151;
+        }
+
+        .dropdown-menu .dropdown-item:focus, 
+        .dropdown-menu .dropdown-item:active {
+            outline: none;
+            box-shadow: none;
+            background-color: #e2e8f0;
+            color: #374151;
         }
 
         .hero-section {
@@ -1274,7 +1290,7 @@
 
         @media (max-width: 576px) {
             .navbar {
-                padding: 0.8rem 1rem;
+                padding: 0.6rem 1rem;
             }
             
             .navbar-brand {
